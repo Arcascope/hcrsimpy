@@ -5,6 +5,7 @@ CBT=DLMO_mid+2hrs
 CBT=circadian phase pi in the model
 DLMO=circadian phase 5pi/12=1.309 in the model
 
+MelatoninOffset=DLMO+10hrs
 """
 
 
@@ -38,9 +39,14 @@ class SinglePopModel:
 
 
     def getParameters(self):
-        """Load the model parameters"""
+        """Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file"""
 
-        self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=map(float, open("optimalParams.dat", 'r').readlines()[0].split())
+        try:
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=map(float, open("optimalParams.dat", 'r').readlines()[0].split())        
+        except:
+            print "Cannot find the optimalParam.dat file, using hard coded parameters for the SP model"
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358,0.024,-0.09318,0.3855,0.1977,-0.0026,-0.957756,0.0400692,33.75,0.05,0.0075,1.5,9325.0]
+    
 
 
 
@@ -70,8 +76,8 @@ class SinglePopModel:
 
         dydt=np.zeros(3)
         
-	dydt[0]=-1.0*self.gamma*R+self.K/2.0*R*(1.0-pow(R,4.0))+LightAmp;
-	dydt[1]=self.w0+LightPhase;
+	dydt[0]=-1.0*self.gamma*R+self.K*sp.cos(self.Beta1)/2.0*R*(1.0-pow(R,4.0))+LightAmp;
+	dydt[1]=self.w0+self.K/2.0*sp.sin(self.Beta1)*(1+pow(R,4.0))+LightPhase;
 	dydt[2]=60.0*(self.alpha0(t)*(1.0-n)-self.delta*n);
 
         return(dydt)
@@ -102,7 +108,7 @@ class SinglePopModel:
         self.results=np.transpose(r.y)
 
     def integrateTransients(self, numdays=50):
-        """Integrate the model for 500 days to get rid of any transients, returns the endpoint to be used as initial conditions"""
+        """Integrate the model for 50 days to get rid of any transients, returns the endpoint to be used as initial conditions"""
 
         tend=numdays*24.0 #need to change this back to 500
         r=sp.integrate.solve_ivp(self.derv,(0,tend), [0.7, 0.0, 0.01], t_eval=[tend], method='Radau')
@@ -110,7 +116,7 @@ class SinglePopModel:
         return(results_trans[-1,:])
 
 
-    def findCBTtimes(self):
+    def findKeyTimes(self):
         """Find the mean circadian phases at different times in the data set as well as the variation"""
         wrapped_time=np.round(map(lambda x: fmod(x, 24.0), self.ts),2)
         df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})            
@@ -119,7 +125,7 @@ class SinglePopModel:
         df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
 
         mean_func=sp.interpolate.interp1d(np.array(df2['Circular_Mean']), np.array(df2.index))
-        return(mean_func(sp.pi))
+        return((mean_func(sp.pi), mean_func(1.309)))
 
 
     def findAveragePhase(self):
@@ -132,12 +138,32 @@ class SinglePopModel:
 
         return(df2)
 
-    def getTS(self):
+    def getTS(self, addMelatonin=True):
         """Return a time series data frame for the system"""
 
         light_ts=map(self.Light, self.ts)
         ts=pd.DataFrame({'Time': self.ts, 'Light_Level':light_ts, 'Phase': self.results[:,1], 'R': self.results[:,0], 'n': self.results[:,2]})
+
+        if (addMelatonin):
+            melatonin=[]
+            light_threshold=100.0 #half max in melatonin suppression
+
+            for i in range(self.results.shape[0]):
+                phase=fmod(self.results[i,1], 2*sp.pi)
+
+                if ((phase>=1.309) and (phase <= 3.92) and (light_ts[i]<=light_threshold)):
+                    melatonin.append(1.0)
+                else:
+                    melatonin.append(0.0)
+                    
+                    
+            ts['Melatonin']=np.array(melatonin)
+
+        
+
+        
         return(ts)
+
 
 
 

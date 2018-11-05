@@ -48,10 +48,10 @@ class stroboscopic:
             self.ax.quiver(Xvals[i-1], Yvals[i-1], Xvals[i]-Xvals[i-1], Yvals[i]-Yvals[i-1], scale_units='xy', angles='xy', scale=1, color='blue')
         self.ax.set_xlim([-1.1,1.1])
         self.ax.set_ylim([-1.1,1.1])
-        self.ax.scatter([0.0], [0.0], color='darkgreen')
+        self.ax.scatter([0.0], [0.0], color='k')
         self.ax.set_axis_off()
 
-    def addStroboPlot(self, tsdf2):
+    def addStroboPlot(self, tsdf2, col='darkgreen'):
         """Add a strobo plot to the axes for comparison"""
         start_amp=tsdf2.R.iloc[0]
         
@@ -64,4 +64,4 @@ class stroboscopic:
         
         upper_bound=min(10, len(Xvals))
         for i in range(1, upper_bound+10):
-            self.ax.quiver(Xvals[i-1], Yvals[i-1], Xvals[i]-Xvals[i-1], Yvals[i]-Yvals[i-1], scale_units='xy', angles='xy', scale=1, color='red')
+            self.ax.quiver(Xvals[i-1], Yvals[i-1], Xvals[i]-Xvals[i-1], Yvals[i]-Yvals[i-1], scale_units='xy', angles='xy', scale=1, color=col)

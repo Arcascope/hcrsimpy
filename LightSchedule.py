@@ -375,12 +375,11 @@ class JennyDataReader:
         self.data.loc[:,'Sleep_Score']=pd.Series(data=map(sleepscoref, self.data['Sleep']), index=self.data.index, dtype=np.float64)
 
         self.removeNaps()
-        #self.data.Sleep_Score=self.data.Sleep_Score.rolling(10, center=True).median()
 
         self.findFirstLight()
 
         self.data=self.data.first('8D') #take only the first 8 days of data
-        self.data.loc[:, 'Lux']=self.data['Lux'].rolling(window=10, center=True).max() #Define the light level as a max over the last 5 minutes
+        self.data.loc[:, 'Lux']=self.data['Lux'].rolling(window=5, center=True).max() #Define the light level as a max over the last 5 minutes
         self.data=self.data.dropna()
         
 
@@ -518,14 +517,51 @@ class JennyDataReader:
 
     def estimateAvgSleepOffset(self):
         pass
-    
-            
+
+
+
+
+
+class WrightLightData:
+
+    def __init__(self):
+
+        self.art_data=np.array(sorted(map(tuple, list(np.loadtxt('../../ExpData/Wright/Wright_Artificial.csv', delimiter=','))), key=lambda x: x[0]))
+        self.nat_data=np.array(sorted(map(tuple, list(np.loadtxt('../../ExpData/Wright/Wright_Natural.csv', delimiter=','))), key=lambda x: x[0]))
+
+        #Make sure the data covers [0,24] only
+        self.nat_data=self.nat_data[self.nat_data[:,0]<=24.0]
+        self.art_data=self.art_data[self.art_data[:,0]<=24.0]
+
+        self.nat_data=np.vstack(([0,1], self.nat_data))
+
+        self.art_data=np.vstack((self.art_data, [24.0, 11.4]))
+        self.art_data=np.vstack(([0.0, 11.5589392], self.art_data))
+
+        self.LightFunNat=interpolate.interp1d(self.nat_data[:,0], self.nat_data[:,1])
+        self.LightFunArt=interpolate.interp1d(self.art_data[:,0], self.art_data[:,1])
+
+        #self.plotLight()
+
+    def LightFunction(self, t, art=False):
+
+        s=fmod(t,24.0)
+
+        if art:
+            return(self.LightFunArt(s))
+        else:
+            return(self.LightFunNat(s))
+
+    def plotLight(self):
+        plt.plot(self.art_data[:,0], np.log10(self.art_data[:,1]), color='blue')
+        plt.plot(self.nat_data[:,0], np.log10(self.nat_data[:,1]), color='red')
+        plt.show()
         
 if __name__=='__main__':
 
     jdr=JennyDataReader(10026, 'BL')
     jdr.plotLightSleep()
-    ans=jdr.estimateAvgSleepMidpoint(show=False)
+    ans=jdr.estimateAvgSleepMidpoint(show=True)
     print ans
 
 

@@ -14,14 +14,135 @@ from singlepop_model import *
 from vdp_model import *
 from twopop_model import *
 from stroboscopic import *
+from latexify import *
 
 
-def compareRegularLight():
+
+def findKeyTimes(tsdf):
+    """Find the DLMO and CBT times for a given time series prediction"""
+
+    wrapped_time=np.round(map(lambda x: fmod(x, 24.0), list(tsdf.Time)),2)
+    df=pd.DataFrame({'Time': wrapped_time, 'Phase': tsdf.Phase})
+    df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
+
+    mean_func=sp.interpolate.interp1d(np.array(df2['Circular_Mean']), np.array(df2.index))
+    return((mean_func(sp.pi), mean_func(1.309)))
+
+
+def compareWrightCamping():
+    """Compare the model predictions for the wright camping data"""
+
+    wd=WrightLightData()
+    wd.plotLight()
+    LightArt=lambda t: wd.LightFunction(t, art=True)
+    LightNat=lambda t: wd.LightFunction(t, art=False)
+
+    #Define the siz model runs to perform
+    a1=SinglePopModel(LightArt)
+    v1=vdp_model(LightArt)
+    t1=TwoPopModel(LightArt)
+
+    a2=SinglePopModel(LightNat)
+    v2=vdp_model(LightNat)
+    t2=TwoPopModel(LightNat)
+
+    models=[a1,v1,t1, a2, v2, t2]
+
+    CBT=[]
+    DLMO=[]
+
+    for m in models:
+        init=m.integrateTransients()
+        ent_angle=m.integrateModel(24*40, initial=init);
+        tsdf=m.getTS()
+        CBTd, DLMOd=findKeyTimes(tsdf)
+        CBT.append(CBTd)
+        DLMO.append(DLMOd)
+
+    print "SP DLMO: ",DLMO[0]-DLMO[3]
+    print "VDP DLMO: ", DLMO[1]-DLMO[4]
+    print "TP DLMO: ", DLMO[2]-DLMO[5]
+    
+
+
+
+
+
+
+
+
+    
+
+
+def regularRoutineStats():
+    """ Find how the DLMO and CBT phases depend on the light intensity provided to the model """
+
+    Intensities=[50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 400.0, 500.0, 750.0, 1000.0, 2500.0, 5000.0, 10000.0]
+    resultsSP=[]
+    resultsTP=[]
+    resultsVDP=[]
+    for i in Intensities:
+        duration=16.0 #gets 8 hours of sleep
+        intensity=i
+        wake=6.0
+        LightFunReg=lambda t: RegularLightSimple(t,intensity,wake,duration)
+
+        #Create SP Model
+        a=SinglePopModel(LightFunReg)
+        init=a.integrateTransients()
+        ent_angle=a.integrateModel(24*40, initial=init);
+        tsdf=a.getTS()
+        CBT, DLMO=findKeyTimes(tsdf)
+        resultsSP.append((i, DLMO, CBT))
+        
+        #Add vdp 
+        v=vdp_model(LightFunReg)
+        init=v.integrateTransients()
+        ent_angle=v.integrateModel(24*40, initial=init);
+        tsdf2=v.getTS()
+        CBT, DLMO=findKeyTimes(tsdf2)
+        resultsVDP.append((i, DLMO, CBT))
+
+        #add tp model
+        t=TwoPopModel(LightFunReg)
+        init=t.integrateTransients()
+        ent_angle=t.integrateModel(24*40, initial=init);
+        tsdf3=t.getTS()
+        CBT, DLMO=findKeyTimes(tsdf3)
+        resultsTP.append((i, DLMO, CBT))
+        
+    resultsSP=np.array(resultsSP)
+    resultsVDP=np.array(resultsVDP)
+    resultsTP=np.array(resultsTP)
+
+    latexify()
+    plt.plot(np.log10(resultsSP[:,0]), 22.0-resultsSP[:,1], color='blue', lw=2.0)
+    plt.plot(np.log10(resultsVDP[:,0]), 22.0-resultsVDP[:,1], color='darkgreen', lw=2.0)
+    plt.plot(np.log10(resultsTP[:,0]), 22.0-resultsTP[:,1], color='red', lw=2.0)
+
+    plt.scatter(np.log10(resultsSP[:,0]), 22.0-resultsSP[:,1], color='blue', marker="o")
+    plt.scatter(np.log10(resultsVDP[:,0]), 22.0-resultsVDP[:,1], color='darkgreen', marker="^")
+    plt.scatter(np.log10(resultsTP[:,0]), 22.0-resultsTP[:,1], color='red', marker="s")
+
+    plt.xlabel(r'$\log_{10}(Lux)$')
+    plt.ylabel('Lights Off-DLMO')
+    plt.title('Light Intensity Effects on DLMO Timing')
+    plt.xlim(1.5,4.0)
+    plt.ylim(1.0,3.0)
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+
+
+
+def compareRegularLight(Intensity=150.0):
 
     duration=16.0 #gets 8 hours of sleep
-    intensity=150.0
     wake=6.0
-    LightFunReg=lambda t: RegularLightSimple(t,intensity,wake,duration)
+    LightFunReg=lambda t: RegularLightSimple(t,Intensity,wake,duration)
     
     #Create SP Model
     a=SinglePopModel(LightFunReg)
@@ -130,20 +251,26 @@ def JetLagActogram(shift):
 
     
     #Add vdp 
-
     v=vdp_model(LightFunReg)
     init=v.integrateTransients()
     v.Light=JetLag
     ent_angle=v.integrateModel(24*40, initial=init);
     tsdf2=v.getTS()
-
     acto.addCircadianPhases(tsdf2, col='darkgreen')
-    
+
+    #add two population model
+    t=TwoPopModel(LightFunReg)
+    init=t.integrateTransients()
+    t.Light=JetLag
+    ent_angle=t.integrateModel(24*40, initial=init);
+    tsdf3=t.getTS()
+    acto.addCircadianPhases(tsdf3, col='red')
 
     plt.figure()
     ax=plt.gca()
     strobo=stroboscopic(ax, tsdf[tsdf['Time']>=10*24.0])
-    strobo.addStroboPlot(tsdf2[tsdf2['Time']>=10*24.0])
+    strobo.addStroboPlot(tsdf2[tsdf2['Time']>=10*24.0], col='darkgreen')
+    strobo.addStroboPlot(tsdf3[tsdf2['Time']>=10*24.0], col='red')
     
     plt.show()
 
@@ -151,8 +278,10 @@ def JetLagActogram(shift):
 
 if __name__=='__main__':
 
-    #JetLagActogram(-11.0)
-    compareRegularLight()
+    compareWrightCamping()
+    #regularRoutineStats()
+    #JetLagActogram(-10.0)
+    #compareRegularLight()
     #compareShiftWork(15,10)
     
 
