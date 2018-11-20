@@ -15,8 +15,16 @@ import sys
 import datetime
 
 from numba import jit
+from FourierSeries import FourierSeries
 
 pd.options.mode.chained_assignment = None  # default='warn'
+
+
+def cal_days_diff(a,b):
+    """Get the calander days between two time dates"""
+    A = a.replace(hour = 0, minute = 0, second = 0, microsecond = 0)
+    B = b.replace(hour = 0, minute = 0, second = 0, microsecond = 0)
+    return (A - B).days
 
 @jit(nopython=True)
 def interpolateLinear(t, xvals, yvals):
@@ -48,11 +56,11 @@ def parse_dt(date, time):
 
 
 @jit(nopython=True)
-def LightLog(lightlevel):
+def LightLog(lightlevel, threshold=1.0):
     """Take the log10 of the light levels, but map 0 to zero and not negative numbers"""
-    if (lightlevel<1.0):
+    if (lightlevel<threshold):
         return(0.0)
-    if (lightlevel>=1.0):
+    if (lightlevel>=threshold):
         return(np.log10(lightlevel))
     
 
@@ -302,8 +310,10 @@ class hchs_light:
         #Create an index to count the hours of the data (UNITS of hours)
         
         self.data['TimeTotal']=(self.data.day)*24.0+pd.DatetimeIndex(self.data.time).hour+pd.DatetimeIndex(self.data.time).minute/60.0+pd.DatetimeIndex(self.data.time).second/3600.0
-
+        self.data['TimeCount']=pd.DatetimeIndex(self.data.time).hour+pd.DatetimeIndex(self.data.time).minute/60.0+pd.DatetimeIndex(self.data.time).second/3600.0
         self.data['Lux']=self.data.Lux.rolling(smoothWindow, center=True).max()
+        #Smooth the wake scores as well
+        self.data['wake']=self.data.wake.rolling(smoothWindow, center=True).mean()
 
         #Drop the missing values introduced
         self.data=self.data.dropna()
@@ -313,7 +323,7 @@ class hchs_light:
 
         #Make a function which gives the light level
         self.LightFunction=lambda t: interpolateLinear(fmod(t, self.endTime), np.array(self.data['TimeTotal']), np.array(self.data['Lux']))
-
+        
 
         #Make a extended function for lomg simulations
         xvals=np.array(self.data['TimeTotal'])
@@ -334,15 +344,46 @@ class hchs_light:
         #Trim off the non-full days within the data set and make a light function using that data
         
 
+    def findMidSleep(self, cutoff=0.5, show=False):
+        """Estimate the midpoint of the sleep. Actually the angular mean of the sleep times"""
+        
+        av_data=self.data.groupby(by=['TimeCount']).mean()
 
+        #Now round the sleep scores:
+        av_data.loc[av_data['wake']>=cutoff, 'wake']=1.0
+        av_data.loc[av_data['wake']<cutoff, 'wake']=0.0
+        
+        sleepTimes=pd.Series(av_data.loc[av_data['wake']==0.0,:].index)
+        toangle=lambda x: np.exp(complex(0,1)*(2*sp.pi*x/24.0))
+        all_angles=np.angle(map(toangle, sleepTimes))
+        Z=np.mean(map(toangle, sleepTimes))
+        angle=np.fmod(np.angle(Z)+2.0*sp.pi, 2.0*sp.pi)
+        amp=abs(Z)
+    
+        timeEquivalent=angle*24.0/(2.0*sp.pi)
 
+        if (show==True):
+            plt.scatter(sp.cos(all_angles), sp.sin(all_angles))
+            plt.scatter(sp.cos(angle), sp.sin(angle), color='green')
+            plt.xlim(-1,1)
+            plt.ylim(-1,1)
+            plt.show()
+
+            plt.plot(av_data.index, av_data.wake, color='green')
+            plt.plot(av_data.index, map(LightLog, list(av_data.Lux)), color='blue')
+            plt.show()
+
+    
+        return(timeEquivalent)
+        
 
     def plot_light(self):
         """Make a plot of the light schedule with each day on top of the last"""
         ts=np.arange(self.data.TimeTotal.iloc[0], self.data.TimeTotal.iloc[-1], 0.01)
         y=map(self.LightFunction, ts)
         plt.plot(ts,map(LightLog, y))
-        plt.scatter(np.array(self.data.TimeTotal), map(LightLog, self.data.Lux), color='red', s=0.1)
+        #plt.scatter(np.array(self.data.TimeTotal), map(LightLog, self.data.Lux), color='red', s=0.1)
+        plt.plot(np.array(self.data.TimeTotal), self.data.wake)
         plt.show()
 
 
@@ -360,7 +401,7 @@ class JennyDataReader:
 
 
 
-        filename="../HumanData/DATA/"+str(num)+str(labelType)+"_epoch.csv"
+        filename="~/work/Research/gpu/Human/HumanData/DATA/"+str(num)+str(labelType)+"_epoch.csv"
         fileData=pd.read_csv(filename, delimiter=',', skiprows=3, parse_dates={'Date_Time': ['Date','Time'] }, date_parser=parse_dt) 
         fileData=fileData.set_index('Date_Time')
         #Make the Sleep column categorical
@@ -368,6 +409,8 @@ class JennyDataReader:
         fileData=fileData.drop(columns=['Sleep or Awake?'])
 
         self.data=fileData[['Lux', 'Sleep']]
+
+    
 
         #Add a numerical sleep score column
         sleep_score_dict={'S':1.0, 'W':0.0}
@@ -378,21 +421,14 @@ class JennyDataReader:
 
         self.findFirstLight()
 
-        self.data=self.data.first('8D') #take only the first 8 days of data
-        self.data.loc[:, 'Lux']=self.data['Lux'].rolling(window=5, center=True).max() #Define the light level as a max over the last 5 minutes
-        self.data=self.data.dropna()
         
 
-        startDay=pd.DatetimeIndex(self.data.index).day[0]
-        days=pd.DatetimeIndex(self.data.index).day-startDay
+        self.data=self.data.first('8D') #take only the first 8 days of data
+        self.data.loc[:, 'Lux']=self.data['Lux'].rolling(window=10, center=True).max() #Define the light level as a max over the last 5 minutes
+        self.data=self.data.dropna()
+
         
-        """
-        if self.data.index[0].time() != datetime.time(0,0,0):
-            norm_time=self.data.index-self.data.index[0]
-        else:
-            norm_time=self.data.index
-        days=norm_time.days
-        """
+        days=np.array([cal_days_diff(d,pd.DatetimeIndex(self.data.index)[0]) for d in pd.DatetimeIndex(self.data.index)])
 
         self.data['TimeCount']=pd.DatetimeIndex(self.data.index).hour*60+pd.DatetimeIndex(self.data.index).minute
         self.data['TimeCount']=self.data['TimeCount']/60.0
@@ -400,7 +436,7 @@ class JennyDataReader:
 
         #Find the light time in hours
         self.data['TimeTotal']=(days*24.0*60+pd.DatetimeIndex(self.data.index).hour*60+pd.DatetimeIndex(self.data.index).minute)/60.0
-
+        
 
         #Store time bounds for ease of use
         self.startTime=self.data.TimeTotal.iloc[0]
@@ -428,9 +464,10 @@ class JennyDataReader:
         #start at zero
         xvals=xvals-24.0
 
-
         #Trim off the non-full days within the data set and make a light function using that data
-        self.LightFunctionInitial=lambda t: interpolateLinearExt(fmod(t, xvals[-1]),xvals,yvals)
+        spInterp=sp.interpolate.UnivariateSpline(xvals, yvals, ext=3)
+        self.LightFunctionInitial=lambda t: np.absolute(spInterp(fmod(t,xvals[-1])))
+        self.LightFunctionInitial2=lambda t: interpolateLinearExt(fmod(t, xvals[-1]),xvals,yvals)
         #Trim off the non-full days within the data set and make a light function using that data
 
 
@@ -445,12 +482,11 @@ class JennyDataReader:
                 break
 
         lastLight=0
-        for j in range(0, self.data.shape[0]):
+        for j in range(1, self.data.shape[0]):
             if self.data.iloc[-j,0]>threshold:
                 lastLight=self.data.shape[0]-j
                 break
-
-        #print firstLight, lastLight
+        
         self.data=self.data.iloc[firstLight:lastLight, :]
 
 
@@ -459,8 +495,10 @@ class JennyDataReader:
 
         x=np.arange(0,10*24.0,0.1)
         y=np.array(map(self.LightFunctionInitial,x))
+        y2=np.array(map(self.LightFunctionInitial2,x))
 
-        plt.plot(x/24.0,np.log10(y+0.1))
+        plt.plot(x/24.0,map(LightLog,y))
+        plt.plot(x/24.0,map(LightLog, y2))
         plt.show()
 
         """
@@ -559,16 +597,17 @@ class WrightLightData:
         
 if __name__=='__main__':
 
-    jdr=JennyDataReader(10026, 'BL')
+    
+    jdr=JennyDataReader(10092, 'P1')
     jdr.plotLightSleep()
-    ans=jdr.estimateAvgSleepMidpoint(show=True)
+    #ans=jdr.estimateAvgSleepMidpoint(show=True)
     print ans
 
-
     sys.exit(0)
-
-    hc=hchs_light('/home/khannay/Desktop/hchs-sol-sueno-00579338.csv')
+    
+    hc=hchs_light('../../HumanData/HCHS/hchs-sol-sueno-00579338.csv')
     hc.plot_light()
+    print hc.findMidSleep(show=True)
     
     sys.exit(0)
     a=WrightLightData()

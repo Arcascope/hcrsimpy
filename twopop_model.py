@@ -30,16 +30,16 @@ class TwoPopModel:
         self.Kvd=0.05
         self.Kdv=0.01
         self.gamma=0.024
-        self.A1=0.43
-        self.A2=0.28
-        self.BetaL=0.09
-        self.BetaL2=-1.49
-        self.sigma=0.07
+        self.A1=0.440068
+        self.A2=0.159136
+        self.BetaL=0.06452
+        self.BetaL2=-1.38935
+        self.sigma=0.0477375
         self.G=33.75
         self.alpha_0=0.05
         self.delta=0.0075
         self.p=1.5
-        self.I0=9985.0
+        self.I0=9325.0
         
         
 
@@ -138,7 +138,7 @@ def guessICDataTwoPop(LightFunc, time_zero, length=150):
     initial=limit_cycle[idx,:]
     initial[2]=fmod(initial[2], 2*sp.pi)
     initial[3]=fmod(initial[3], 2*sp.pi)
-    print time_zero, initial
+    #print time_zero, initial
     return(initial)
 
 

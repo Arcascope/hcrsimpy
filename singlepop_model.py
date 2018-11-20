@@ -44,7 +44,7 @@ class SinglePopModel:
         try:
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=map(float, open("optimalParams.dat", 'r').readlines()[0].split())        
         except:
-            print "Cannot find the optimalParam.dat file, using hard coded parameters for the SP model"
+            #print "Cannot find the optimalParam.dat file, using hard coded parameters for the SP model"
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358,0.024,-0.09318,0.3855,0.1977,-0.0026,-0.957756,0.0400692,33.75,0.05,0.0075,1.5,9325.0]
     
 

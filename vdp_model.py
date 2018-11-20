@@ -134,7 +134,7 @@ def guessICDataVDP(LightFunc, time_zero, length=50):
 
     idx=np.searchsorted(lc_ts,time_zero)-1
     initial=limit_cycle[idx,:]
-    print time_zero, initial
+    #print time_zero, initial
     return(initial)    
 
 
