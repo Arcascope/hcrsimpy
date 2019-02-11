@@ -421,8 +421,6 @@ class JennyDataReader:
 
         self.findFirstLight()
 
-        
-
         self.data=self.data.first('8D') #take only the first 8 days of data
         self.data.loc[:, 'Lux']=self.data['Lux'].rolling(window=10, center=True).max() #Define the light level as a max over the last 5 minutes
         self.data=self.data.dropna()
@@ -442,8 +440,6 @@ class JennyDataReader:
         self.startTime=self.data.TimeTotal.iloc[0]
         self.endTime=self.data.TimeTotal.iloc[-1]
 
-
-        self.avg_data=self.data.groupby(by=['TimeCount']).mean()
         self.LightFunctionAvg=lambda t: interpolateLinear(t, np.array(self.avg_data.index), np.array(self.avg_data['Lux']), period=24.0)
         self.LightFunction=lambda t: interpolateLinear(t, np.array(self.data['TimeTotal']), np.array(self.data['Lux']))
 
@@ -461,16 +457,31 @@ class JennyDataReader:
         yvals=yvals[xvals<=final_time]
         xvals=xvals[xvals<=final_time]
 
+        ind_included_day=[]
+
+        for i in range(0,self.data.shape[0]):
+            ttVal=self.data['TimeTotal'].iloc[i]
+            if ((ttVal>=xvals[0]) and (ttVal<=xvals[-1])):
+                ind_included_day.append(1)
+            else:
+                ind_included_day.append(0)
+
+        self.data['Included_Day']=pd.Series(ind_included_day, index=self.data.index)
+
         #start at zero
         xvals=xvals-24.0
+
+        self.total_days=num_days
 
         #Trim off the non-full days within the data set and make a light function using that data
         spInterp=sp.interpolate.UnivariateSpline(xvals, yvals, ext=3)
         self.LightFunctionInitial=lambda t: np.absolute(spInterp(fmod(t,xvals[-1])))
-        self.LightFunctionInitial2=lambda t: interpolateLinearExt(fmod(t, xvals[-1]),xvals,yvals)
-        #Trim off the non-full days within the data set and make a light function using that data
 
+        #Extract the dates to be used in comparing with sleep data for included_days only
 
+        self.data['Date_Only']=self.data.index.date
+        
+       
     def findFirstLight(self):
         """Find the first time light is recorded in the data set"""
 
@@ -495,18 +506,11 @@ class JennyDataReader:
 
         x=np.arange(0,10*24.0,0.1)
         y=np.array(map(self.LightFunctionInitial,x))
-        y2=np.array(map(self.LightFunctionInitial2,x))
 
         plt.plot(x/24.0,map(LightLog,y))
-        plt.plot(x/24.0,map(LightLog, y2))
         plt.show()
 
-        """
-        plt.plot(self.data.TimeTotal, np.log10(self.data['Lux']+0.1), color='blue')
-        plt.plot(self.data.TimeTotal, self.data.Sleep_Score, color='darkgreen')
-        plt.ylim(0,4)
-        plt.show()
-        """
+        
 
 
     def removeNaps(self):

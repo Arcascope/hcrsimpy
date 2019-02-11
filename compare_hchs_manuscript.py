@@ -62,6 +62,8 @@ hchs=pd.merge(hchs2, sleep_data, on='Filename', how='left')
 hchs=hchs[hchs['Num_Good_Days']>=5]
 hchs=hchs.dropna(subset=['SP_DLMO', 'TP_DLMO', 'VDP_DLMO'])
 
+
+
 #Add some additional columns
 diff_sptp=[]
 diff_spvdp=[]
@@ -97,7 +99,7 @@ list_of_agreements=list(hchs[criteriaNOT].Filename)
 
 print "Number of Model Diff: ", sum(criteriaInt)
 print "Percentage of Model Diff: ", sum(criteriaInt)/float(hchs.shape[0])*100
-print hchs.shape
+print "Total number of light schedules considered", hchs.shape
 
 
 x=np.linspace(0.0,24.0,200)

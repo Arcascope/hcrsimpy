@@ -73,7 +73,9 @@ def circular_scatter(ax, angles, clock_times=False, radius=1.0, color='blue'):
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
     ax.set_thetagrids(range(0,360,45), range(0,24,3))
-    ax.set_rmax(1.1)
+    ax.set_rmax(1.2)
+    ax.set_rticks([0.0,0.2,0.6,0.8,1.0])
     ax.annotate("", xytext=(0.0,0.0), xy=(circular_mean(angles),phase_coherence(angles)),arrowprops=dict(facecolor=color))
+    
     
     

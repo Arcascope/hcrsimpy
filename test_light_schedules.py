@@ -19,6 +19,10 @@ from LightSchedule import *
 from singlepop_model import *
 from stroboscopic import *
 
+#from latexify import *
+
+#latexify()
+
 
 def actogramRegularLight():
     """Show the effect of a regular light schedule on the circadian clock"""
@@ -38,6 +42,8 @@ def actogramRegularLight():
     acto=actogram(ax, tsdf) #add an actogram to those axes
 
     plt.title('Entrainment under Regular Light Conditions')
+    plt.tight_layout()
+    plt.savefig('Regular_Light_actogram.eps')
     plt.show()
 
 
@@ -118,9 +124,9 @@ def JetLagActogram(shift):
 
 if __name__=='__main__':
 
-    #JetLagActogram(-11.0)
-    #actogramRegularLight()
-    actogramShiftWork(15,10)
+    #JetLagActogram(12.0)
+    actogramRegularLight()
+    #actogramShiftWork(5,2)
     
 
 

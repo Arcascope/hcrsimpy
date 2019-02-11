@@ -155,8 +155,13 @@ class actogram:
         self.ax.scatter(cbt_times, dayYvalsCBT, color=col, marker='x', zorder=10)
         self.ax.scatter(cbt_times+24.0, dayYvalsCBT, color=col, marker='x', zorder=10)
     
+    def addMarker(self, time, col='red'):
+        """Add another marker to the actogram at a particular time, i.e. Carrie melatonin dosage time"""
+        time2=[fmod(time, 24.0), fmod(time,24.0), fmod(time, 24.0)]
+        yval=[self.num_days-int(time/24.0)+0.5, self.num_days-int(time/24.0)+0.5-1, self.num_days-int(time/24.0)+0.5-2]
         
-    
+        self.ax.scatter(time2, yval, color='red', marker="v")
+        self.ax.scatter(np.array(time2)+24.0, yval, color='red', marker="v")
     
     
     

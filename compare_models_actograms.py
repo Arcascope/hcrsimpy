@@ -278,9 +278,9 @@ def JetLagActogram(shift):
 
 if __name__=='__main__':
 
-    compareWrightCamping()
+    #compareWrightCamping()
     #regularRoutineStats()
-    #JetLagActogram(-10.0)
+    JetLagActogram(-10.0)
     #compareRegularLight()
     #compareShiftWork(15,10)
     
