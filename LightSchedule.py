@@ -15,7 +15,7 @@ import sys
 import datetime
 
 from numba import jit
-from FourierSeries import FourierSeries
+#from FourierSeries import FourierSeries
 
 pd.options.mode.chained_assignment = None  # default='warn'
 

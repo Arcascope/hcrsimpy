@@ -39,4 +39,4 @@ def actogramRegularLightMel(MelatoninTime=96.0):
     plt.show()
 
 if __name__=='__main__':
-    actogramRegularLightMel(110.0)
+    actogramRegularLightMel(112.0)
