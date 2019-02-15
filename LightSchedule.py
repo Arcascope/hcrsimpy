@@ -135,7 +135,29 @@ def SlamShift(t, shift=8.0, intensity=150.0, beforeDays=10):
             newVal+=24.0
         return(RegularLightSimple(t, intensity, wakeUp=newVal, workday=16.0))
         
-    
+
+def OneDayShift(t, pulse=23.0, wakeUp=8.0, workday=16.0, shift=8.0):
+
+    t=fmod(t, 40*24)
+
+    beforeDays=10.0
+
+    if (t<= 24*beforeDays):
+        return(RegularLightSimple(t, 150.0, wakeUp=wakeUp, workday=workday))
+
+    if ((t>= 24*beforeDays) and (t<=24*(beforeDays+1))):
+        #adjustment day get to add one hour of bright light
+        pulse+=24*beforeDays
+        Light=RegularLightSimple(t, 150.0, wakeUp=wakeUp, workday=workday)
+        Light+=10000.0*(0.5*sp.tanh(100*(t-pulse)) - 0.5*sp.tanh(100*(t- 1.0-pulse)))
+        return(Light)
+
+    if (t>24*(beforeDays+1)):
+        newVal=fmod(8.0+shift, 24.0)
+        if (newVal<0):
+            newVal+=24.0
+        return(RegularLightSimple(t, 150.0, wakeUp=newVal, workday=16.0))
+
 
 
 
