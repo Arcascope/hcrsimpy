@@ -142,17 +142,19 @@ def OneDayShift(t, pulse=23.0, wakeUp=8.0, workday=16.0, shift=8.0):
 
     beforeDays=10.0
 
-    if (t<= 24*beforeDays):
+    if (t< 24*beforeDays-3*24.0):
         return(RegularLightSimple(t, 150.0, wakeUp=wakeUp, workday=workday))
 
-    if ((t>= 24*beforeDays) and (t<=24*(beforeDays+1))):
+    if ((t>= 24*beforeDays-3*24.0) and (t<=24*beforeDays)):
         #adjustment day get to add one hour of bright light
         pulse+=24*beforeDays
         Light=RegularLightSimple(t, 150.0, wakeUp=wakeUp, workday=workday)
-        Light+=10000.0*(0.5*sp.tanh(100*(t-pulse)) - 0.5*sp.tanh(100*(t- 1.0-pulse)))
+        Light+=10000.0*(0.5*sp.tanh(100*(t-pulse+72.0)) - 0.5*sp.tanh(100*(t- 1.0-pulse+72.0)))
+        Light+=10000.0*(0.5*sp.tanh(100*(t-pulse+48.0)) - 0.5*sp.tanh(100*(t- 1.0-pulse+48.0)))
+        Light+=10000.0*(0.5*sp.tanh(100*(t-pulse+24.0)) - 0.5*sp.tanh(100*(t- 1.0-pulse+24.0)))
         return(Light)
 
-    if (t>24*(beforeDays+1)):
+    if (t>24*(beforeDays)):
         newVal=fmod(8.0+shift, 24.0)
         if (newVal<0):
             newVal+=24.0

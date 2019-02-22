@@ -113,7 +113,7 @@ def JetLagActogram(shift):
     plt.figure()
     ax=plt.gca()
     acto=actogram(ax, tsdf) #add an actogram to those axes
-
+    ax.set_title("8 Hour Shift with no Intervention")
     plt.figure()
     ax=plt.gca()
     strobo=stroboscopic(ax, tsdf[tsdf['Time']>=10*24.0])
@@ -124,8 +124,8 @@ def JetLagActogram(shift):
 
 if __name__=='__main__':
 
-    #JetLagActogram(12.0)
-    actogramRegularLight()
+    JetLagActogram(8.0)
+    #actogramRegularLight()
     #actogramShiftWork(5,2)
     
 

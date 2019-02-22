@@ -130,10 +130,14 @@ def JetLagActogram(shift, MelatoninTime=8.0):
     ax=plt.gca()
     acto=actogram(ax, tsdf) #add an actogram to those axes
     acto.addMarker(MelatoninTime)
+    ax.set_title('Jetlag Recovery from an 8 Hour Shift')
+
     
     plt.figure()
     ax=plt.gca()
     strobo=stroboscopic(ax, tsdf[tsdf['Time']>=10*24.0])
+
+    ax.set_title('Jetlag Recovery from a 8 Hour Shift')
     
     plt.show()
 
@@ -142,6 +146,10 @@ def JetLagActogram(shift, MelatoninTime=8.0):
     
 
 if __name__=='__main__':
-    #JetLagActogram(8.0, MelatoninTime=8.0)
-    #actogramRegularLightMel(112.6)
-    print EntrainTime(8.0, 8.0)
+    JetLagActogram(-8.0, MelatoninTime=13.5)
+    actogramRegularLightMel(112.6)
+
+    """
+    for i in np.arange(0,24.0,0.25):
+        print i, EntrainTime(8.0, i)
+    """
