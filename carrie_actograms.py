@@ -15,19 +15,23 @@ from stroboscopic import *
 from MelatoninSchedule import *
 
 
-def EntrainTime(shift, MelatoninTime):
+def EntrainTime(shift, MelatoninTime, melOn=True):
     """Put in a light and melatonin schedule and get out reentrainment time"""
     duration=16.0 #gets 8 hours of sleep
     intensity=150.0
     wake=6.0
     LightFunReg=lambda t: RegularLightSimple(t,intensity,wake,duration)
+    JetLag=lambda t: SlamShift(t, shift)
 
-    MelatoninTime+=10*24.0
+    MelatoninTime+=11*24.0
     Mel=lambda t: threeMelPulse(t, timePulse=MelatoninTime)
     
     #Create SP Model
-    a=SinglePopModel(LightFunReg, Mel)
+    a=SinglePopModel(LightFunReg, lambda t: 0.0)
     init=a.integrateTransients()
+    a.Light=JetLag
+    if melOn==True:
+        a.Mel=Mel
     ent_angle=a.integrateModel(24*40, initial=init);
     tsdf=a.getTS()
 
@@ -58,19 +62,15 @@ def EntrainTime(shift, MelatoninTime):
         cbt_times=cbt_times[np.isfinite(cbt_times)]
         dayYvalsCBT=num_days-np.arange(1.5, len(cbt_times)+1.5, 1.0)
 
-    delta_dlmo=np.diff(dlmo_times)
-    reentrain_time=0
-    passed_shift=False
-    for d in delta_dlmo:
-        if abs(d)>0.1:
-            passed_shift=True
-        if passed_shift==True and abs(d)<0.01:
-            reentrain_time+=1
+    final_dlmo=dlmo_times[-1]
+    for d in range(0, len(dlmo_times)):
+        if np.absolute(dlmo_times[d]-final_dlmo)<0.5:
+            day_done=d
             break
-        else:
-            reentrain_time+=1
+            
+    
 
-    return(reentrain_time-10)
+    return(day_done)
     
         
         
@@ -114,7 +114,7 @@ def JetLagActogram(shift, MelatoninTime=8.0):
     else:
         print "Simulating eastbound travel by ", abs(shift), " time zones"
 
-    MelatoninTime+=10*24.0
+    MelatoninTime+=11*24.0
         
     LightFunReg=lambda t: RegularLightSimple(t,150.0, 8.0,16.0)
     JetLag=lambda t: SlamShift(t, shift)
@@ -126,17 +126,27 @@ def JetLagActogram(shift, MelatoninTime=8.0):
     a.Light=JetLag
     ent_angle=a.integrateModel(24*40, initial=init);
     tsdf=a.getTS()
+
+    #No Melatonin
+    b=SinglePopModel(LightFunReg, lambda t: 0.0)
+    init=b.integrateTransients()
+    b.Light=JetLag
+    ent_angle=b.integrateModel(24*40, initial=init);
+    tsdf2=b.getTS()
+
+
+    
     plt.figure()
     ax=plt.gca()
     acto=actogram(ax, tsdf) #add an actogram to those axes
     acto.addMarker(MelatoninTime)
     ax.set_title('Jetlag Recovery from an 8 Hour Shift')
-
+    acto.addCircadianPhases(tsdf2, col='red')
     
     plt.figure()
     ax=plt.gca()
     strobo=stroboscopic(ax, tsdf[tsdf['Time']>=10*24.0])
-
+    strobo.addStroboPlot(tsdf2, col='red')
     ax.set_title('Jetlag Recovery from a 8 Hour Shift')
     
     plt.show()
@@ -147,9 +157,10 @@ def JetLagActogram(shift, MelatoninTime=8.0):
 
 if __name__=='__main__':
     JetLagActogram(-8.0, MelatoninTime=13.5)
-    actogramRegularLightMel(112.6)
+    #print EntrainTime(-8.0, 13.5, False)-EntrainTime(-8.0, 13.5, True)
+    #actogramRegularLightMel(112.6)
 
-    """
-    for i in np.arange(0,24.0,0.25):
-        print i, EntrainTime(8.0, i)
-    """
+    
+    for i in np.arange(0,24.0,0.5):
+        print i, EntrainTime(-8.0, i, False)-EntrainTime(-8.0, i, True)
+    
