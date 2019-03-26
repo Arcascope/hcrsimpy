@@ -23,7 +23,9 @@ def ProgressMeasure(shift, pulse, plot=False):
     wake=8.0
     LightFunReg=lambda t: RegularLightSimple(t,intensity,wake,duration)
     LightFunTest=lambda t: OneDayShift(t,shift=shift, pulse=pulse, wakeUp=wake)
+    JetLag=lambda t: SlamShift(t, shift)
 
+    
     #Create SP Model
     a=SinglePopModel(LightFunReg)
     init=a.integrateTransients()
@@ -31,12 +33,20 @@ def ProgressMeasure(shift, pulse, plot=False):
     ent_angle=b.integrateModel(24*40, initial=init);
     tsdf=b.getTS()
 
+    #Create model with no extra light pulse
+    c=SinglePopModel(LightFunReg)
+    init=c.integrateTransients()
+    c.Light=JetLag
+    ent_angle=c.integrateModel(24*40, initial=init);
+    tsdfNo=c.getTS()
+
     if plot:
         plt.figure()
         ax=plt.gca()
         acto=actogram(ax, tsdf) #add an actogram to those axes
         acto.addMarker2(8*24.0+pulse)
-        ax.set_title("Optimal Shifts")
+        acto.addCircadianPhases(tsdfNo, col='red')
+        ax.set_title("Optimal Shifts East 8.0 Hrs")
         plt.show()
 
     timePulse=24.0*10.0+pulse
@@ -54,9 +64,10 @@ def ProgressMeasure(shift, pulse, plot=False):
 
     
 def findMin(shift):
-    xvalues=np.arange(0,24.0,0.1)
+    xvalues=np.arange(0,24.0,1.0)
     myfunc=lambda x: ProgressMeasure(shift=shift, pulse=x)
     y=map(myfunc, xvalues)
+    print zip(xvalues,y)
     y=np.absolute(y)
     idxmin=np.argmin(y)
     xval=xvalues[idxmin]
@@ -64,14 +75,21 @@ def findMin(shift):
 
 
 
+
+
     
 
 if __name__=='__main__':
 
-    print "This many hours out of phase ",  ProgressMeasure(shift=8, pulse=23.0, plot=True)
+    ProgressMeasure(8.0, 23.0, True)
     sys.exit(0)
 
-    shifts=np.arange(-12.0,12.0,0.1)
+    #findMin(6.0)
+
+    #print "This many hours out of phase ",  ProgressMeasure(shift=6, pulse=10.0, plot=True)
+    #sys.exit(0)
+
+    shifts=np.arange(-12.0,12.0,1.0)
     f=open("results_opt_mil_more.txt", "w")
     for s in shifts:
         bestTime, hoursOff=findMin(s)

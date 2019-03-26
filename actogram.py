@@ -54,7 +54,7 @@ class actogram:
         self.ax.plot(24.0*np.ones(100), np.linspace(0, self.num_days,100), ls='--', lw=2.0, color='black', zorder=9)
 
         self.addLightSchedule()
-        self.addCircadianPhases()
+        self.dlmo=self.addCircadianPhases()
 
 
     def getRectangles(self, timeon, timeoff, colorIn='yellow'):
@@ -154,6 +154,8 @@ class actogram:
 
         self.ax.scatter(cbt_times, dayYvalsCBT, color=col, marker='x', zorder=10)
         self.ax.scatter(cbt_times+24.0, dayYvalsCBT, color=col, marker='x', zorder=10)
+
+        return dlmo_times
     
     def addMarker(self, time, col='red'):
         """Add another marker to the actogram at a particular time, i.e. Carrie melatonin dosage time"""
@@ -170,6 +172,10 @@ class actogram:
         
         self.ax.scatter(time2, yval, color='red', marker="P")
         self.ax.scatter(np.array(time2)+24.0, yval, color='red', marker="P")
+
+
+    def getDLMOtimes(self):
+        return(self.dlmo)
     
     
     

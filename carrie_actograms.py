@@ -78,7 +78,7 @@ def EntrainTime(shift, MelatoninTime, melOn=True):
     
     
 
-def actogramRegularLightMel(MelatoninTime=96.0):
+def actogramRegularLightMel(MelatoninTime=.0):
     """Show the effect of a regular light schedule on the circadian clock"""
 
     duration=16.0 #gets 8 hours of sleep
@@ -86,6 +86,7 @@ def actogramRegularLightMel(MelatoninTime=96.0):
     wake=6.0
     LightFunReg=lambda t: RegularLightSimple(t,intensity,wake,duration)
 
+    MelatoninTime+=11*24.0
     Mel=lambda t: threeMelPulse(t, timePulse=MelatoninTime)
     
     #Create SP Model
@@ -156,11 +157,21 @@ def JetLagActogram(shift, MelatoninTime=8.0):
     
 
 if __name__=='__main__':
-    JetLagActogram(-8.0, MelatoninTime=13.5)
-    #print EntrainTime(-8.0, 13.5, False)-EntrainTime(-8.0, 13.5, True)
-    #actogramRegularLightMel(112.6)
+    JetLagActogram(11.0, MelatoninTime=17.25)
+    print EntrainTime(-8.0, 13.5, False)-EntrainTime(-8.0, 13.5, True)
+    #actogramRegularLightMel(16.0)
+    sys.exit(0)
+    ivalues=np.arange(0,24.0,1.0)
+    EntrainDiff=[]
+    for i in ivalues:
+        EntrainDiff.append(EntrainTime(-8.0, i, False)-EntrainTime(-8.0, i, True))
 
-    
-    for i in np.arange(0,24.0,0.5):
-        print i, EntrainTime(-8.0, i, False)-EntrainTime(-8.0, i, True)
+    plt.figure()
+    ax=plt.gca()
+    ax.bar(ivalues, EntrainDiff)
+    ax.set_title('Optimal Entrainment: 8 hour west shift')
+    ax.set_xlabel("Dosage Time")
+    ax.set_ylabel(r'Entrainment Days Saved')
+    plt.savefig('optimal_barplot.png')
+    plt.show()
     
