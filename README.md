@@ -1,5 +1,5 @@
 # HumanCircadianRhythmsSimPackage
-Tools for simulating human circadian rhythms for a given light schedule
+Tools for simulating human circadian rhythms for a given light schedule (PYTHON 2 Library)
 
 
 This package contains python programs for simulating the single population, two population and van der Pol models for Human 
@@ -21,7 +21,7 @@ The file compare_models_actograms contains tools for simulating the three models
 
 # Create your own light schedules
 
-For each of the models you can pass in and defined light schedule with gives light levels in lux. 
+For each of the models you can pass in and defined light schedule which gives light levels in lux. 
 
 
 

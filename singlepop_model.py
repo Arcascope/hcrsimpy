@@ -44,14 +44,14 @@ class SinglePopModel:
         try:
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=map(float, open("optimalParams.dat", 'r').readlines()[0].split())        
         except:
-            #print "Cannot find the optimalParam.dat file, using hard coded parameters for the SP model"
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358,0.024,-0.09318,0.3855,0.1977,-0.0026,-0.957756,0.0400692,33.75,0.05,0.0075,1.5,9325.0]
+            print "Cannot find the optimalParam.dat file, using hard coded parameters for the SP model"
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
     
 
 
 
     def updatePeriod(self, newVal):
-        """Change the period of the circadian clock, should be put in in hours"""
+        """Change the period of the circadian clock, should be put in as hours"""
         if (newVal >=10.0 and newVal<=35.0):
             self.w0=2*sp.pi/newVal
         else:
@@ -169,7 +169,8 @@ class SinglePopModel:
 
 
 def guessICData(LightFunc, time_zero, length=150, show=False):
-    """Guess the Initial conditions for the model using the persons light schedule
+    """
+    Guess the Initial conditions for the model using the persons light schedule
     Need to add a check to see if the system is entrained at all....
 
     guessICData(LightFunc, time_zero, length=150, show=False)
