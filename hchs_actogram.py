@@ -15,13 +15,10 @@ from twopop_model import *
 from stroboscopic import *
 
 from latexify import *
+latexify()
 
 from actogram import *
-
-latexify()
-#from joblib import Parallel, delayed
-
-
+from joblib import Parallel, delayed
 import os
 import random
 
@@ -86,16 +83,16 @@ def get_all_hchs_files():
 
     file_list=[]
      
-    for file in os.listdir("../../../HumanData/HCHS/"):
+    for file in os.listdir("../../HumanData/HCHS/"):
         if file.endswith(".csv"):
-            file_list.append(str(os.path.join("../../../HumanData/HCHS/", file)))
+            file_list.append(str(os.path.join("../../HumanData/HCHS/", file)))
 
     return(file_list)
 
 
 def runParticularData(filenumber, trans_days=50):
      """Given a id number run that system"""
-     fileName="../../../HumanData/HCHS/hchs-sol-sueno-"+str(filenumber)+".csv"
+     fileName="../../HumanData/HCHS/hchs-sol-sueno-"+str(filenumber)+".csv"
 
      hc=hchs_light(fileName)
 
@@ -129,7 +126,7 @@ def runAllFilesDLMO():
      """
      fl=get_all_hchs_files()
      print "Total Files: ", len(fl)
-     allOutputs= Parallel(n_jobs=32)(delayed(get_diff)(f) for f in fl[0:10])
+     allOutputs= Parallel(n_jobs=32)(delayed(get_diff)(f) for f in fl)
 
      
      outfile=open('hchs_model_diff_new.csv', 'w')
@@ -196,47 +193,70 @@ def chooseRandomData(trans_days=50):
      print fileName
 
 
-def chooseShiftWorker(j=0, trans_days=50.0):
-    """Choose a shift worker and make an actogram"""
 
+
+def runAllShiftWorkers():
+    """
+        Run through all the sw and make an actogram for their recorded light schedules
+    """
     swlist=open('HCHS_ShiftWorkers_PID.csv').readlines()[1:]
 
     swlist=[s.strip().strip("\"") for s in swlist]
 
-    sw=swlist[j]
-
-    fileName="../../HumanData/HCHS/hchs-sol-sueno-"+sw+".csv"
-
-    hc=hchs_light(fileName)
-
-    init=guessICData(hc.LightFunctionInitial, 0.0, length=trans_days)
-     
-    a=SinglePopModel(hc.LightFunctionInitial)
-     
-    ent_angle=a.integrateModelData((0.0, 10.0*24.0), initial=init);
-    tsdf=a.getTS()
-    plt.figure()
-    ax=plt.gca()
-    acto=actogram(ax, tsdf) #add an actogram to those axes
-    dlmo=acto.getDLMOtimes()
-    print "Phase Coherence DLMO: ", phase_coherence_clock(dlmo)
-    sys.exit(0)
     
-    mytitle='HCHS Actogram '+sw
-    ax.set_title(mytitle)
-    plt.tight_layout()
-    plt.savefig('sw_actogram.eps')
-    plt.show()
+    allOutputs= Parallel(n_jobs=32)(delayed(chooseShiftWorker)(f) for f in swlist)
+
+    print "Total Number of files generated: ", sum(allOutputs)
+     
+    
+
+
+
+     
+
+def chooseShiftWorker(sw, trans_days=50.0):
+    """Choose a shift worker and make an actogram"""
+
+    try:
+        fileName="../../HumanData/HCHS/hchs-sol-sueno-"+sw+".csv"
+
+        hc=hchs_light(fileName)
+
+        init=guessICData(hc.LightFunctionInitial, 0.0, length=trans_days)
+     
+        a=SinglePopModel(hc.LightFunctionInitial)
+     
+        ent_angle=a.integrateModelData((0.0, 10.0*24.0), initial=init);
+        tsdf=a.getTS()
+        plt.figure()
+        ax=plt.gca()
+        acto=actogram(ax, tsdf) #add an actogram to those axes
+        dlmo=acto.getDLMOtimes()
+        #print "Phase Coherence DLMO: ", phase_coherence_clock(dlmo)
+        saveString=sw+"\t"+str(phase_coherence_clock(dlmo))
+        print saveString 
+    
+        mytitle='HCHS Actogram '+sw
+        ax.set_title(mytitle)
+        plt.tight_layout()
+        figname="ShiftWorkerPlots/sw_actogram_"+sw+".eps"
+        plt.savefig(figname)
+        return(1)
+    except:
+        return(0)
 
     
 
 if __name__=='__main__':
 
-    chooseShiftWorker(8)
-    """
-     #runAllFilesDLMO()
 
-     #sys.exit(0)
+    #runAllShiftWorkers()
+
+    
+    
+     runAllFilesDLMO()
+
+     sys.exit(0)
      
      if len(sys.argv)<2:
           plotRandomSP()
@@ -245,6 +265,6 @@ if __name__=='__main__':
                runParticularData(sys.argv[1])
           else:
                runParticularData(sys.argv[1], int(sys.argv[2]))
-    """
+
 
 
