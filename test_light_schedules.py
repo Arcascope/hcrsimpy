@@ -1,27 +1,20 @@
 """
-This file can be used to examine the predicted effects of given light schedules on the single population human model
+This file can be used to examine the predicted effects of given light schedules on the single population human model.
+
+It contains a few basic function to make some actograms for basic light schedules including regular, jetlag and shiftwork
+scenarios.
+
+
 """
-
-
 
 import numpy as np
 import scipy as sp
-from scipy.integrate import *
 import pylab as plt
-from math import *
-import sys
-from sets import Set
-import pandas as pd
-from scipy import interpolate
 from actogram import *
-from circular_stats import *
 from LightSchedule import *
 from singlepop_model import *
 from stroboscopic import *
 
-#from latexify import *
-
-#latexify()
 
 
 def actogramRegularLight():
@@ -31,7 +24,7 @@ def actogramRegularLight():
     intensity=150.0
     wake=6.0
     LightFunReg=lambda t: RegularLightSimple(t,intensity,wake,duration)
-    
+
     #Create SP Model
     a=SinglePopModel(LightFunReg)
     init=a.integrateTransients()
@@ -99,11 +92,11 @@ def JetLagActogram(shift):
         print "Simulating eastbound travel by ", abs(shift), " time zones"
 
 
-        
+
     LightFunReg=lambda t: RegularLightSimple(t,150.0, 8.0,16.0)
     JetLag=lambda t: SlamShift(t, shift)
 
-    
+
     #Create SP Model
     a=SinglePopModel(LightFunReg)
     init=a.integrateTransients()
@@ -117,7 +110,7 @@ def JetLagActogram(shift):
     plt.figure()
     ax=plt.gca()
     strobo=stroboscopic(ax, tsdf[tsdf['Time']>=10*24.0])
-    
+
     plt.show()
 
 
@@ -127,6 +120,3 @@ if __name__=='__main__':
     JetLagActogram(8.0)
     #actogramRegularLight()
     #actogramShiftWork(5,2)
-    
-
-
