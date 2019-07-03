@@ -4,10 +4,8 @@ from scipy.integrate import *
 import pylab as plt
 from math import *
 import sys
-from sets import Set
 import pandas as pd
 from scipy import interpolate
-import seaborn as sbn
 from LightSchedule import *
 
 
@@ -52,23 +50,23 @@ class TwoPopModel:
     def derv(self,t,y):
 
         Rv=y[0];
-	Rd=y[1];
-	Psiv=y[2];
-	Psid=y[3];
-	n=y[4];
+        Rd=y[1];
+        Psiv=y[2];
+        Psid=y[3];
+        n=y[4];
 
-	Bhat=self.G*(1.0-n)*self.alpha0(t);
+        Bhat=self.G*(1.0-n)*self.alpha0(t);
 
-	LightAmp=self.A1*0.5*Bhat*(1.0-pow(Rv,4.0))*cos(Psiv+self.BetaL)+self.A2*0.5*Bhat*Rv*(1.0-pow(Rv,8.0))*cos(2.0*Psiv+self.BetaL2);
-	LightPhase=self.sigma*Bhat-self.A1*Bhat*0.5*(pow(Rv,3.0)+1.0/Rv)*sp.sin(Psiv+self.BetaL)-self.A2*Bhat*0.5*(1.0+pow(Rv,8.0))*sp.sin(2.0*Psiv+self.BetaL2);
+        LightAmp=self.A1*0.5*Bhat*(1.0-pow(Rv,4.0))*cos(Psiv+self.BetaL)+self.A2*0.5*Bhat*Rv*(1.0-pow(Rv,8.0))*cos(2.0*Psiv+self.BetaL2);
+        LightPhase=self.sigma*Bhat-self.A1*Bhat*0.5*(pow(Rv,3.0)+1.0/Rv)*sp.sin(Psiv+self.BetaL)-self.A2*Bhat*0.5*(1.0+pow(Rv,8.0))*sp.sin(2.0*Psiv+self.BetaL2);
 
         dydt=np.zeros(5)
        
-	dydt[0]=-self.gamma*Rv+self.Kvv/2.0*Rv*(1-pow(Rv,4.0))+self.Kdv/2.0*Rd*(1-pow(Rv,4.0))*cos(Psid-Psiv)+LightAmp;
-	dydt[1]=-self.gamma*Rd+self.Kdd/2.0*Rd*(1-pow(Rd,4.0))+self.Kvd/2.0*Rv*(1.0-pow(Rd,4.0))*cos(Psid-Psiv);
-	dydt[2]=2.0*sp.pi/self.tauV+self.Kdv/2.0*Rd*(pow(Rv,3.0)+1.0/Rv)*sp.sin(Psid-Psiv)+LightPhase;
-	dydt[3]=2.0*sp.pi/self.tauD-self.Kvd/2.0*Rv*(pow(Rd,3.0)+1.0/Rd)*sp.sin(Psid-Psiv);
-	dydt[4]=60.0*(self.alpha0(t)*(1.0-n)-self.delta*n);
+        dydt[0]=-self.gamma*Rv+self.Kvv/2.0*Rv*(1-pow(Rv,4.0))+self.Kdv/2.0*Rd*(1-pow(Rv,4.0))*cos(Psid-Psiv)+LightAmp;
+        dydt[1]=-self.gamma*Rd+self.Kdd/2.0*Rd*(1-pow(Rd,4.0))+self.Kvd/2.0*Rv*(1.0-pow(Rd,4.0))*cos(Psid-Psiv);
+        dydt[2]=2.0*sp.pi/self.tauV+self.Kdv/2.0*Rd*(pow(Rv,3.0)+1.0/Rv)*sp.sin(Psid-Psiv)+LightPhase;
+        dydt[3]=2.0*sp.pi/self.tauD-self.Kvd/2.0*Rv*(pow(Rd,3.0)+1.0/Rd)*sp.sin(Psid-Psiv);
+        dydt[4]=60.0*(self.alpha0(t)*(1.0-n)-self.delta*n);
         return(dydt)
 
 
@@ -109,7 +107,7 @@ class TwoPopModel:
     def getTS(self):
         """Return a time series data frame for the system"""
 
-        light_ts=map(self.Light, self.ts)
+        light_ts=list(map(self.Light, self.ts))
         theta=self.results[:,2]-self.results[:,1]
         Rv=self.results[:,0]
         Rd=self.results[:,1]

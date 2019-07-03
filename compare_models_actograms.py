@@ -13,7 +13,7 @@ from singlepop_model import *
 from vdp_model import *
 from twopop_model import *
 from stroboscopic import *
-from latexify import *
+
 
 
 
@@ -114,7 +114,7 @@ def regularRoutineStats():
     resultsVDP=np.array(resultsVDP)
     resultsTP=np.array(resultsTP)
 
-    latexify()
+
     plt.plot(np.log10(resultsSP[:,0]), 22.0-resultsSP[:,1], color='blue', lw=2.0)
     plt.plot(np.log10(resultsVDP[:,0]), 22.0-resultsVDP[:,1], color='darkgreen', lw=2.0)
     plt.plot(np.log10(resultsTP[:,0]), 22.0-resultsTP[:,1], color='red', lw=2.0)

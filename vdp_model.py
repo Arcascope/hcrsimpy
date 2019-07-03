@@ -97,7 +97,7 @@ class vdp_model:
     def getTS(self):
         """Return a time series data frame for the system"""
 
-        light_ts=map(self.Light, self.ts)
+        light_ts=list(map(self.Light, self.ts))
         Amplitude=np.sqrt(self.results[:,0]**2+self.results[:,1]**2) #define the amplitude as the sqrt of each coordinate squared
 
         #Need to extract a phase in radians

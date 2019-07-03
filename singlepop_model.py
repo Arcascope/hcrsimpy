@@ -139,7 +139,7 @@ class SinglePopModel:
     def getTS(self, addMelatonin=True):
         """Return a time series data frame for the system"""
 
-        light_ts=map(self.Light, self.ts)
+        light_ts=list(map(self.Light, self.ts))
         ts=pd.DataFrame({'Time': self.ts, 'Light_Level':light_ts, 'Phase': self.results[:,1], 'R': self.results[:,0], 'n': self.results[:,2]})
 
         if (addMelatonin):
