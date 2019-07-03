@@ -5,7 +5,6 @@ from scipy.integrate import *
 import pylab as plt
 from math import *
 import sys
-from sets import Set
 import pandas as pd
 from scipy import interpolate
 import seaborn as sbn
@@ -43,16 +42,16 @@ class vdp_model:
     def derv(self,t,y):
         
         x=y[0];
-	xc=y[1];
-	n=y[2];
+        xc=y[1];
+        n=y[2];
 
-	Bhat=self.G*(1.0-n)*self.alpha0(t)*(1-0.4*x)*(1-0.4*xc);
+        Bhat=self.G*(1.0-n)*self.alpha0(t)*(1-0.4*x)*(1-0.4*xc);
 
         dydt=np.zeros(3)
 	       
-	dydt[0]=sp.pi/12.0*(xc+Bhat);
-	dydt[1]=sp.pi/12.0*(self.mu*(xc-4.0/3.0*pow(xc,3.0))-x*(pow(24.0/(0.99669*self.taux),2.0)+self.kparam*Bhat));
-	dydt[2]=60.0*(self.alpha0(t)*(1.0-n)-self.delta*n); 
+        dydt[0]=sp.pi/12.0*(xc+Bhat);
+        dydt[1]=sp.pi/12.0*(self.mu*(xc-4.0/3.0*pow(xc,3.0))-x*(pow(24.0/(0.99669*self.taux),2.0)+self.kparam*Bhat));
+        dydt[2]=60.0*(self.alpha0(t)*(1.0-n)-self.delta*n); 
 
         return(dydt)
 
@@ -67,10 +66,10 @@ class vdp_model:
         self.results=np.transpose(r.y)
 
         ent_angle=1.0*atan2(self.results[-1,1],self.results[-1,0]); #times negative one because VDP runs clockwise versus counterclockwise
-	if (ent_angle < 0.0):
-	    ent_angle+=2*sp.pi;
+        if (ent_angle < 0.0):
+            ent_angle+=2*sp.pi;
 	
-	ent_angle=ent_angle*24.0/(2.0*sp.pi);
+        ent_angle=ent_angle*24.0/(2.0*sp.pi);
         return(ent_angle)
 
     def integrateModelData(self, timespan, initial):

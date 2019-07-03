@@ -16,7 +16,6 @@ from scipy.integrate import *
 import pylab as plt
 from math import *
 import sys
-from sets import Set
 import pandas as pd
 from scipy import interpolate
 import seaborn as sbn
@@ -44,7 +43,7 @@ class SinglePopModel:
         try:
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=map(float, open("optimalParams.dat", 'r').readlines()[0].split())        
         except:
-            print "Cannot find the optimalParam.dat file, using hard coded parameters for the SP model"
+            print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
     
 
@@ -55,7 +54,7 @@ class SinglePopModel:
         if (newVal >=10.0 and newVal<=35.0):
             self.w0=2*sp.pi/newVal
         else:
-            print "The new circadian period should be in hours, it looks like you forgot this so the period was not updated"
+            print("The new circadian period should be in hours, it looks like you forgot this so the period was not updated")
         
 
     def alpha0(self,t):
@@ -66,19 +65,18 @@ class SinglePopModel:
     def derv(self,t,y):
         """ This defines the ode system for the single population model """
         R=y[0];
-	Psi=y[1];
-	n=y[2];
+        Psi=y[1]
+        n=y[2];
 
-	Bhat=self.G*(1.0-n)*self.alpha0(t);
-	LightAmp=self.A1*0.5*Bhat*(1.0-pow(R,4.0))*sp.cos(Psi+self.BetaL)+self.A2*0.5*Bhat*R*(1.0-pow(R,8.0))*sp.cos(2.0*Psi+self.BetaL2);
-	LightPhase=self.sigma*Bhat-self.A1*Bhat*0.5*(pow(R,3.0)+1.0/R)*sp.sin(Psi+self.BetaL)-self.A2*Bhat*0.5*(1.0+pow(R,8.0))*sp.sin(2.0*Psi+self.BetaL2);
-
+        Bhat=self.G*(1.0-n)*self.alpha0(t);
+        LightAmp=self.A1*0.5*Bhat*(1.0-pow(R,4.0))*sp.cos(Psi+self.BetaL)+self.A2*0.5*Bhat*R*(1.0-pow(R,8.0))*sp.cos(2.0*Psi+self.BetaL2);
+        LightPhase=self.sigma*Bhat-self.A1*Bhat*0.5*(pow(R,3.0)+1.0/R)*sp.sin(Psi+self.BetaL)-self.A2*Bhat*0.5*(1.0+pow(R,8.0))*sp.sin(2.0*Psi+self.BetaL2);
 
         dydt=np.zeros(3)
-        
-	dydt[0]=-1.0*self.gamma*R+self.K*sp.cos(self.Beta1)/2.0*R*(1.0-pow(R,4.0))+LightAmp;
-	dydt[1]=self.w0+self.K/2.0*sp.sin(self.Beta1)*(1+pow(R,4.0))+LightPhase;
-	dydt[2]=60.0*(self.alpha0(t)*(1.0-n)-self.delta*n);
+
+        dydt[0]=-1.0*self.gamma*R+self.K*sp.cos(self.Beta1)/2.0*R*(1.0-pow(R,4.0))+LightAmp;
+        dydt[1]=self.w0+self.K/2.0*sp.sin(self.Beta1)*(1+pow(R,4.0))+LightPhase;
+        dydt[2]=60.0*(self.alpha0(t)*(1.0-n)-self.delta*n);
 
         return(dydt)
 
@@ -193,7 +191,7 @@ def guessICData(LightFunc, time_zero, length=150, show=False):
     initial[1]=fmod(initial[1], 2*sp.pi)
 
     if (show):
-        print "Time zero, initial ", time_zero, initial
+        print("Time zero, initial ", time_zero, initial)
     return(initial)
     
 

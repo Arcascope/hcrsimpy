@@ -4,7 +4,6 @@ from scipy.integrate import *
 import pylab as plt
 from math import *
 import sys
-from sets import Set
 import pandas as pd
 from scipy import interpolate
 from actogram import *
@@ -59,9 +58,9 @@ def compareWrightCamping():
         CBT.append(CBTd)
         DLMO.append(DLMOd)
 
-    print "SP DLMO: ",DLMO[0]-DLMO[3]
-    print "VDP DLMO: ", DLMO[1]-DLMO[4]
-    print "TP DLMO: ", DLMO[2]-DLMO[5]
+    print("SP DLMO: ",DLMO[0]-DLMO[3])
+    print("VDP DLMO: ", DLMO[1]-DLMO[4])
+    print("TP DLMO: ", DLMO[2]-DLMO[5])
     
 
 
@@ -229,9 +228,9 @@ def JetLagActogram(shift):
     """Simulate the circadian rhythms of a slam shift in the light schedule. By default this will for a fully entrained subject and the shift will occur on the 11th day"""
 
     if (shift<0.0):
-        print "Simulating westbound travel by ", abs(shift), " time zones"
+        print("Simulating westbound travel by ", abs(shift), " time zones")
     else:
-        print "Simulating eastbound travel by ", abs(shift), " time zones"
+        print("Simulating eastbound travel by ", abs(shift), " time zones")
 
 
         

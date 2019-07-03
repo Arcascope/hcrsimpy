@@ -18,7 +18,6 @@ from scipy.integrate import *
 import pylab as plt
 from math import *
 import sys
-from sets import Set
 import pandas as pd
 from scipy import interpolate
 import seaborn as sbn

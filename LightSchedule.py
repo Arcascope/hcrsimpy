@@ -629,13 +629,13 @@ if __name__=='__main__':
     jdr=JennyDataReader(10092, 'P1')
     jdr.plotLightSleep()
     #ans=jdr.estimateAvgSleepMidpoint(show=True)
-    print ans
+    print(ans)
 
     sys.exit(0)
     
     hc=hchs_light('../../HumanData/HCHS/hchs-sol-sueno-00579338.csv')
     hc.plot_light()
-    print hc.findMidSleep(show=True)
+    print(hc.findMidSleep(show=True))
     
     sys.exit(0)
     a=WrightLightData()
