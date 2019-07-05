@@ -35,8 +35,8 @@ class stroboscopic:
         Yvals=np.array(self.tsdf.R/start_amp*sp.sin(self.tsdf.Phase))
     
         circle_angles=np.linspace(0,2*sp.pi,1000)
-        circle_x=map(lambda x: sp.cos(x), circle_angles)
-        circle_y=map(lambda x: sp.sin(x), circle_angles)
+        circle_x=list(map(lambda x: sp.cos(x), circle_angles))
+        circle_y=list(map(lambda x: sp.sin(x), circle_angles))
 
         self.ax.plot(circle_x, circle_y, lw=2.0, color='k')
         #Sample down to every 24 hours
