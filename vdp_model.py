@@ -1,4 +1,7 @@
 
+from builtins import map
+from builtins import range
+from builtins import object
 import numpy as np
 import scipy as sp
 from scipy.integrate import *
@@ -16,7 +19,7 @@ from LightSchedule import *
 
 
 
-class vdp_model:
+class vdp_model(object):
 
     def __init__(self, LightFun):
 
@@ -129,7 +132,7 @@ def guessICDataVDP(LightFunc, time_zero, length=50):
 
     limit_cycle=a.results
     timeDay=lambda x: fmod(x,48.0)
-    lc_ts=np.array(map(timeDay, a.ts))
+    lc_ts=np.array(list(map(timeDay, a.ts)))
 
     idx=np.searchsorted(lc_ts,time_zero)-1
     initial=limit_cycle[idx,:]

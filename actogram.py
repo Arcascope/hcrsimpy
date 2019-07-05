@@ -12,6 +12,9 @@ DLMO=circadian phase 5pi/12=1.309 in the model
 
 
 
+from builtins import map
+from builtins import range
+from builtins import object
 import numpy as np
 import scipy as sp
 from scipy.integrate import *
@@ -20,10 +23,9 @@ from math import *
 import sys
 import pandas as pd
 from scipy import interpolate
-import seaborn as sbn
 
 
-class actogram:
+class actogram(object):
 
     def __init__(self, ax, tsdf, threshold=10.0):
         """Create an actogram object from time series data given as a pandas dataframe with the columns Time, Phase, Light_Level, it can have more columns but must have those at least
@@ -127,23 +129,23 @@ class actogram:
         
         if (tsdf2.Phase.iloc[0]<1.309):
             dlmo_phases=np.arange(1.309, real_days*2.0*sp.pi, 2*sp.pi) #all the dlmo phases using 1.309 as the cicadian phase of the DLMO
-            dlmo_times=np.array(map(lambda x: fmod(x,24.0), list(map(dlmo_func, dlmo_phases))))
+            dlmo_times=np.array(list(([fmod(x,24.0) for x in list(map(dlmo_func, dlmo_phases))])))
             dlmo_times= dlmo_times[np.isfinite(dlmo_times)]
             dayYvalsDLMO=self.num_days-np.arange(0.5, len(dlmo_times)+0.5, 1.0)
         else:
             dlmo_phases=np.arange(1.309+2*sp.pi, real_days*2.0*sp.pi, 2*sp.pi) #all the dlmo phases using 1.309 as the cicadian phase of the DLMO
-            dlmo_times=np.array(list(map(lambda x: fmod(x,24.0), list(map(dlmo_func, dlmo_phases)))))
+            dlmo_times=np.array(list([fmod(x,24.0) for x in list(map(dlmo_func, dlmo_phases))]))
             dlmo_times= dlmo_times[np.isfinite(dlmo_times)]
             dayYvalsDLMO=self.num_days-np.arange(1.5, len(dlmo_times)+1.5, 1.0)
 
         if (tsdf2.Phase.iloc[0]<sp.pi):
             cbt_phases=np.arange(sp.pi, real_days*2.0*sp.pi, 2*sp.pi)
-            cbt_times=np.array(list(map(lambda x: fmod(x,24.0), list(map(dlmo_func, cbt_phases)))))
+            cbt_times=np.array(list([fmod(x,24.0) for x in list(map(dlmo_func, cbt_phases))]))
             cbt_times=cbt_times[np.isfinite(cbt_times)]
             dayYvalsCBT=self.num_days-(np.arange(0.5, len(cbt_times)+0.5, 1.0))
         else:
             cbt_phases=np.arange(sp.pi+2*sp.pi, real_days*2.0*sp.pi, 2*sp.pi)
-            cbt_times=np.array(map(lambda x: fmod(x,24.0), list(map(dlmo_func, cbt_phases))))
+            cbt_times=np.array(list([fmod(x,24.0) for x in list(map(dlmo_func, cbt_phases))]))
             cbt_times=cbt_times[np.isfinite(cbt_times)]
             dayYvalsCBT=self.num_days-np.arange(1.5, len(cbt_times)+1.5, 1.0)
 

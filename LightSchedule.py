@@ -1,10 +1,24 @@
 
 
 """
-This python module contains functions for creating light schedules giving the light levels in lux as a function of time in hours. Used as input to simulate the circadian models
+This python module contains functions for creating light schedules giving the light levels in lux as a function of time in hours. 
+
+Used as input to simulate the circadian models.
+
+Contains some common schedules as well as some custom data driven schedules
+
+
 
 """
+from __future__ import division
+from __future__ import print_function
 
+from builtins import str
+from builtins import zip
+from builtins import map
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import numpy as np
 import scipy as sp
 import pandas as pd
@@ -13,6 +27,7 @@ from scipy import interpolate
 import pylab as plt
 import sys
 import datetime
+
 
 from numba import jit
 #from FourierSeries import FourierSeries
@@ -36,7 +51,7 @@ def interpolateLinear(t, xvals, yvals):
         t+=24.0
 
     i=np.searchsorted(xvals,t)-1
-    ans=(yvals[i+1]-yvals[i])/(xvals[i+1]-xvals[i])*(t-xvals[i])+yvals[i]
+    ans=(yvals[i+1]-yvals[i])/((xvals[i+1]-xvals[i])*(t-xvals[i]))+yvals[i]
     return(ans)
 
 
@@ -44,7 +59,7 @@ def interpolateLinear(t, xvals, yvals):
 def interpolateLinearExt(t, xvals, yvals):
     """Implement a faster method to get linear interprolations of the light functions, exclude non-full days"""
     i=np.searchsorted(xvals,t)-1
-    ans=(yvals[i+1]-yvals[i])/(xvals[i+1]-xvals[i])*(t-xvals[i])+yvals[i]
+    ans=(yvals[i+1]-yvals[i])/((xvals[i+1]-xvals[i])*(t-xvals[i]))+yvals[i]
     return(ans)
 
 
@@ -92,8 +107,6 @@ def ShiftWorkLight(t, dayson=5, daysoff=2):
     """
 
     t=fmod(t, (dayson+daysoff)*24) #make it repeat
-
-    
     if (t<=24*dayson):
 
         return(RegularLightSimple(t, Intensity=150.0, wakeUp=16.0, workday=16.0))
@@ -165,7 +178,7 @@ def OneDayShift(t, pulse=23.0, wakeUp=8.0, workday=16.0, shift=8.0):
 
 
 
-class WrightLightData:
+class WrightLightData(object):
 
     def __init__(self):
 
@@ -201,7 +214,7 @@ class WrightLightData:
         plt.show()
 
 
-class NoisyLightInput:
+class NoisyLightInput(object):
 
     def __init__(self):
         #Length of active period
@@ -294,12 +307,12 @@ class NoisyLightInput:
             avgLightLevels[s].append(self.lightVals[j])
 
         averageVal=[]
-        for k in avgLightLevels.keys():
+        for k in list(avgLightLevels.keys()):
             averageVal.append((k,np.mean(avgLightLevels[k])))
 
         averageVal=sorted(averageVal, key=lambda x: x[0])
 
-        x,y=zip(*averageVal)
+        x,y=list(zip(*averageVal))
         y=np.array(y)
         plt.plot(x,y+1.0)
         plt.show()
@@ -307,7 +320,7 @@ class NoisyLightInput:
 
 
 
-class hchs_light:
+class hchs_light(object):
 
     def __init__(self, filename, smoothWindow=20):
 
@@ -379,12 +392,12 @@ class hchs_light:
         
         sleepTimes=pd.Series(av_data.loc[av_data['wake']==0.0,:].index)
         toangle=lambda x: np.exp(complex(0,1)*(2*sp.pi*x/24.0))
-        all_angles=np.angle(map(toangle, sleepTimes))
-        Z=np.mean(map(toangle, sleepTimes))
+        all_angles=np.angle(list(map(toangle, sleepTimes)))
+        Z=np.mean(list(map(toangle, sleepTimes)))
         angle=np.fmod(np.angle(Z)+2.0*sp.pi, 2.0*sp.pi)
         amp=abs(Z)
     
-        timeEquivalent=angle*24.0/(2.0*sp.pi)
+        timeEquivalent=old_div(angle*24.0,(2.0*sp.pi))
 
         if (show==True):
             plt.scatter(sp.cos(all_angles), sp.sin(all_angles))
@@ -394,7 +407,7 @@ class hchs_light:
             plt.show()
 
             plt.plot(av_data.index, av_data.wake, color='green')
-            plt.plot(av_data.index, map(LightLog, list(av_data.Lux)), color='blue')
+            plt.plot(av_data.index, list(map(LightLog, list(av_data.Lux))), color='blue')
             plt.show()
 
     
@@ -404,8 +417,8 @@ class hchs_light:
     def plot_light(self):
         """Make a plot of the light schedule with each day on top of the last"""
         ts=np.arange(self.data.TimeTotal.iloc[0], self.data.TimeTotal.iloc[-1], 0.01)
-        y=map(self.LightFunction, ts)
-        plt.plot(ts,map(LightLog, y))
+        y=list(map(self.LightFunction, ts))
+        plt.plot(ts,list(map(LightLog, y)))
         #plt.scatter(np.array(self.data.TimeTotal), map(LightLog, self.data.Lux), color='red', s=0.1)
         plt.plot(np.array(self.data.TimeTotal), self.data.wake)
         plt.show()
@@ -413,7 +426,7 @@ class hchs_light:
 
 
 
-class JennyDataReader:
+class JennyDataReader(object):
     """BL is the school year, P1 is the summer months"""
 
     def __init__(self,num,labelType):
@@ -439,7 +452,7 @@ class JennyDataReader:
         #Add a numerical sleep score column
         sleep_score_dict={'S':1.0, 'W':0.0}
         sleepscoref=lambda x: sleep_score_dict[x]
-        self.data.loc[:,'Sleep_Score']=pd.Series(data=map(sleepscoref, self.data['Sleep']), index=self.data.index, dtype=np.float64)
+        self.data.loc[:,'Sleep_Score']=pd.Series(data=list(map(sleepscoref, self.data['Sleep'])), index=self.data.index, dtype=np.float64)
 
         self.removeNaps()
 
@@ -529,9 +542,9 @@ class JennyDataReader:
         """Make a plot of the light function"""
 
         x=np.arange(0,10*24.0,0.1)
-        y=np.array(map(self.LightFunctionInitial,x))
+        y=np.array(list(map(self.LightFunctionInitial,x)))
 
-        plt.plot(x/24.0,map(LightLog,y))
+        plt.plot(x/24.0,list(map(LightLog,y)))
         plt.show()
 
         
@@ -558,12 +571,12 @@ class JennyDataReader:
         
         sleepTimes=pd.Series(av_data.loc[av_data['Sleep_Score']==1.0,:].index)
         toangle=lambda x: np.exp(complex(0,1)*(2*sp.pi*x/24.0))
-        all_angles=np.angle(map(toangle, sleepTimes))
-        Z=np.mean(map(toangle, sleepTimes))
+        all_angles=np.angle(list(map(toangle, sleepTimes)))
+        Z=np.mean(list(map(toangle, sleepTimes)))
         angle=np.fmod(np.angle(Z)+2.0*sp.pi, 2.0*sp.pi)
         amp=abs(Z)
     
-        timeEquivalent=angle*24.0/(2.0*sp.pi)
+        timeEquivalent=old_div(angle*24.0,(2.0*sp.pi))
 
         if (show==True):
             plt.scatter(sp.cos(all_angles), sp.sin(all_angles))
@@ -588,7 +601,7 @@ class JennyDataReader:
 
 
 
-class WrightLightData:
+class WrightLightData(object):
 
     def __init__(self):
 
@@ -622,26 +635,14 @@ class WrightLightData:
         plt.plot(self.art_data[:,0], np.log10(self.art_data[:,1]), color='blue')
         plt.plot(self.nat_data[:,0], np.log10(self.nat_data[:,1]), color='red')
         plt.show()
+
+
+        
         
 if __name__=='__main__':
 
-    
-    jdr=JennyDataReader(10092, 'P1')
-    jdr.plotLightSleep()
-    #ans=jdr.estimateAvgSleepMidpoint(show=True)
-    print(ans)
-
-    sys.exit(0)
-    
     hc=hchs_light('../../HumanData/HCHS/hchs-sol-sueno-00579338.csv')
     hc.plot_light()
     print(hc.findMidSleep(show=True))
     
-    sys.exit(0)
-    a=WrightLightData()
-    f=lambda t: a.LightFunction(t, art=False)
-    g=lambda t: a.LightFunction(t, art=True)
-    t=np.linspace(0,96,1000)
-    plt.plot(t, np.log10(map(f,t)))
-    plt.plot(t, np.log10(map(g,t)), color='red')
-    plt.show()
+    

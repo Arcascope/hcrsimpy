@@ -55,6 +55,7 @@
 *.pyo
 *.pyf
 *.pickle
+*.bak
 
 
 #Figure files

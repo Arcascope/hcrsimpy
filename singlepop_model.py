@@ -7,9 +7,13 @@ DLMO=circadian phase 5pi/12=1.309 in the model
 
 MelatoninOffset=DLMO+10hrs
 """
+from __future__ import print_function
 
 
 
+from builtins import map
+from builtins import range
+from builtins import object
 import numpy as np
 import scipy as sp
 from scipy.integrate import *
@@ -27,7 +31,7 @@ from LightSchedule import *
 #Make a class to store methods related to simulating the circadian model
 
 
-class SinglePopModel:
+class SinglePopModel(object):
     """A simple python program to integrate the human circadian rhythms model for a given light schedule"""
 
     def __init__(self, LightFun):
@@ -41,7 +45,7 @@ class SinglePopModel:
         """Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file"""
 
         try:
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=map(float, open("optimalParams.dat", 'r').readlines()[0].split())        
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("optimalParams.dat", 'r').readlines()[0].split()))        
         except:
             print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
@@ -116,7 +120,7 @@ class SinglePopModel:
 
     def findKeyTimes(self):
         """Find the mean circadian phases at different times in the data set as well as the variation"""
-        wrapped_time=np.round(map(lambda x: fmod(x, 24.0), self.ts),2)
+        wrapped_time=np.round([fmod(x, 24.0) for x in self.ts],2)
         df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})            
 
         #Find the circular statistics for the circadian phase data at each time point
@@ -129,7 +133,7 @@ class SinglePopModel:
     def findAveragePhase(self):
         """Find the average circadian phase for each clock time in the simulation. Returns a pandas data frame with index given by the wrapped time, the mean phase across the simulation, phase coherence and number of samples"""
 
-        wrapped_time=np.round(map(lambda x: fmod(x, 24.0), self.ts),2)
+        wrapped_time=np.round([fmod(x, 24.0) for x in self.ts],2)
         df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})            
         
         df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
@@ -184,14 +188,14 @@ def guessICData(LightFunc, time_zero, length=150, show=False):
 
     limit_cycle=a.results
     timeDay=lambda x: fmod(x,48.0)
-    lc_ts=np.array(map(timeDay, a.ts))
+    lc_ts=np.array(list(map(timeDay, a.ts)))
 
     idx=np.searchsorted(lc_ts,time_zero)-1
     initial=limit_cycle[idx,:]
     initial[1]=fmod(initial[1], 2*sp.pi)
 
     if (show):
-        print("Time zero, initial ", time_zero, initial)
+        print(("Time zero, initial ", time_zero, initial))
     return(initial)
     
 

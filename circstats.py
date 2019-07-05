@@ -280,12 +280,7 @@ def mean(alpha, axis=None, w=None, fconf=False, nancheck=True):
     """
 
     if nancheck and np.isnan(alpha).any():
-        raise(ValueError,
-              "NaN(s) detected in the input array.  "
-              "If you want to ignore this message, "
-              "please set nancheck to False.  If you "
-              "want to make the mean robust to NaNs, "
-              "please use the nanmean function instead.")
+        raise ValueError
 
     return _mean(alpha, False, axis=axis, w=w, fconf=fconf)
 
@@ -376,11 +371,7 @@ def resvec(alpha, axis=None, w=None, d=0, nancheck=True):
     """
 
     if nancheck and np.isnan(alpha).any():
-        raise(ValueError,
-              "NaN(s) detected in the input array.  If you "
-              "want to ignore this message, please set nancheck "
-              "to False.  If you want to make the mean robust to "
-              "NaNs, please use the nanresvec function instead.")
+        raise ValueError
 
     return _resvec(alpha, False, axis=axis, w=w, d=d)
 
@@ -468,11 +459,7 @@ def var(alpha, axis=None, w=None, d=0, angvar=False, nancheck=True):
     """
 
     if nancheck and np.isnan(alpha).any():
-        raise(ValueError,
-              "NaN(s) detected in the input array.  If you want "
-              "to ignore this message, please set nancheck to "
-              "False.  If you want to make the mean robust to NaNs, "
-              "please use the nanvar function instead.")
+        raise ValueError
 
     return _var(alpha, False, axis=axis, w=w, d=d, angvar=angvar)
 
@@ -566,11 +553,7 @@ def std(data, axis=None, deg=False, varroot=False, nancheck=True):
     """
 
     if nancheck and np.isnan(data).any():
-        raise (ValueError,
-               "NaN(s) detected in the input array.  If you want "
-               "to ignore this message, please set nancheck to "
-               "False.  If you want to make the stddev robust to "
-               "NaNs, please use the nanstd function instead.")
+        raise ValueError
     return _std(data, False, axis=axis, deg=deg, varroot=varroot)
 
 
@@ -676,11 +659,7 @@ def confmean(alpha, axis=None, ci=0.95, w=None, d=0, nancheck=True):
     """
 
     if nancheck and np.isnan(alpha).any():
-        raise(ValueError,
-              "NaN(s) detected in the input array.  If you want "
-              "to ignore this message, please set nancheck to False.  "
-              "If you want to make the mean robust to NaNs, please use "
-              "the nanconfmean function instead.")
+        raise ValueError
 
     return _confmean(alpha, False, axis=axis, ci=ci, w=w, d=d)
 
@@ -719,7 +698,7 @@ def nanconfmean(alpha, axis=None, ci=0.95, w=None, d=0):
 
 def _corrcc(alpha1, alpha2, nanrobust, axis=None):
     if axis is not None and alpha1.shape[axis] != alpha2.shape[axis]:
-        raise(ValueError, "shape mismatch")
+        raise ValueError
 
     # compute mean directions
     if axis is None:
@@ -870,12 +849,7 @@ def vmpar(alpha, axis=None, w=None, d=0, nancheck=True):
     """
 
     if nancheck and np.isnan(alpha).any():
-        raise(ValueError,
-              "NaN(s) detected in the input array.  "
-              "If you want to ignore this message, please "
-              "set nancheck to False.  If you want to make "
-              "the mean robust to NaNs, please use the nanvmpar "
-              "function instead.")
+        raise ValueError
 
     return _vmpar(alpha, False, axis=axis, w=w, d=d)
 
@@ -1045,12 +1019,7 @@ def kappa(alpha, axis=None, w=None, d=0, nancheck=True):
     """
 
     if nancheck and np.isnan(alpha).any():
-        raise(ValueError,
-              "NaN(s) detected in the input array.  If "
-              "you want to ignore this message, please set "
-              "nancheck to False.  If you want to make the "
-              "mean robust to NaNs, please use the nankappa "
-              "function instead.")
+        raise ValueError
 
     return _kappa(alpha, False, axis=axis, w=w, d=d)
 

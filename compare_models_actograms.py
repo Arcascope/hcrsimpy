@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import scipy as sp
 from scipy.integrate import *
@@ -20,7 +21,7 @@ from stroboscopic import *
 def findKeyTimes(tsdf):
     """Find the DLMO and CBT times for a given time series prediction"""
 
-    wrapped_time=np.round(map(lambda x: fmod(x, 24.0), list(tsdf.Time)),2)
+    wrapped_time=np.round([fmod(x, 24.0) for x in list(tsdf.Time)],2)
     df=pd.DataFrame({'Time': wrapped_time, 'Phase': tsdf.Phase})
     df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
 
@@ -58,9 +59,9 @@ def compareWrightCamping():
         CBT.append(CBTd)
         DLMO.append(DLMOd)
 
-    print("SP DLMO: ",DLMO[0]-DLMO[3])
-    print("VDP DLMO: ", DLMO[1]-DLMO[4])
-    print("TP DLMO: ", DLMO[2]-DLMO[5])
+    print(("SP DLMO: ",DLMO[0]-DLMO[3]))
+    print(("VDP DLMO: ", DLMO[1]-DLMO[4]))
+    print(("TP DLMO: ", DLMO[2]-DLMO[5]))
     
 
 
@@ -228,9 +229,9 @@ def JetLagActogram(shift):
     """Simulate the circadian rhythms of a slam shift in the light schedule. By default this will for a fully entrained subject and the shift will occur on the 11th day"""
 
     if (shift<0.0):
-        print("Simulating westbound travel by ", abs(shift), " time zones")
+        print(("Simulating westbound travel by ", abs(shift), " time zones"))
     else:
-        print("Simulating eastbound travel by ", abs(shift), " time zones")
+        print(("Simulating eastbound travel by ", abs(shift), " time zones"))
 
 
         

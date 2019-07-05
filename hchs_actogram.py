@@ -1,10 +1,30 @@
+"""
+This file will generate model predictions using real life light schedules from the HCHS survey data set. 
+
+https://sleepdata.org/datasets/hchs
+
+Once you have downloaded this data you will need to update the paths just below the imports to run this program
+
+The main function that is used from this file in our publication is the
+
+runAllFilesDLMO()
+
+This generates predictions for the three models for all participants in the data set. This file is then examined by the 
+
+compare_hchs_manuscript program. 
+
+"""
+from __future__ import print_function
+
+
+
+from builtins import str
 import numpy as np
 import scipy as sp
 from scipy.integrate import *
 import pylab as plt
 from math import *
 import sys
-from sets import Set
 import pandas as pd
 from scipy import interpolate
 from circular_stats import *
@@ -22,10 +42,17 @@ from joblib import Parallel, delayed
 import os
 import random
 
+#LOCATION OF HCHS DATA FILES, UPDATE THIS FOR YOUR SYSTEM
+
+hchs_files_location="../../HumanData/HCHS/hchs-sol-sueno-"
+hchs_files_directory="../../HumanData/HCHS/"
+
+
+
 def findKeyDLMOTimes(tsdf):
     """Find the DLMO and CBT times for a given time series prediction"""
 
-    wrapped_time=np.round(map(lambda x: fmod(x, 24.0), list(tsdf.Time)),2)
+    wrapped_time=np.round([fmod(x, 24.0) for x in list(tsdf.Time)],2)
     df=pd.DataFrame({'Time': wrapped_time, 'Phase': tsdf.Phase})
     df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
     mean_func=sp.interpolate.interp1d(np.array(df2['Circular_Mean']), np.array(df2.index))
@@ -48,7 +75,6 @@ def get_diff(f):
      """Used to find the average DLMO times of all data in the hchs data set, in a parallel fashion"""
      fnum=f.split('-')[-1].split('.')[0]
 
-     #try:
      trans_days=50
      hc=hchs_light(f)
      sm=hc.findMidSleep()
@@ -69,10 +95,7 @@ def get_diff(f):
      d1, d2, d3,r1,r2,r3=record_diff(tsdf, tsdf_vdp, tsdf_two)
      return(fnum+", "+str(d1)+", "+str(d2)+", "+str(d3)+", "+str(r1)+ ", "+ str(r2)+ ", "+ str(r3)+", "+ str(sm)+"\n")
 
-     #except:
-          #print "Error with: ", f
-          #return(fnum+", "+str(-1.0)+", "+str(-1.0)+", "+str(-1.0)+"\n")
-
+     
 
      
      
@@ -83,16 +106,16 @@ def get_all_hchs_files():
 
     file_list=[]
      
-    for file in os.listdir("../../HumanData/HCHS/"):
+    for file in os.listdir(hchs_files_directory):
         if file.endswith(".csv"):
-            file_list.append(str(os.path.join("../../HumanData/HCHS/", file)))
+            file_list.append(str(os.path.join(hchs_files_directory, file)))
 
     return(file_list)
 
 
 def runParticularData(filenumber, trans_days=50):
      """Given a id number run that system"""
-     fileName="../../HumanData/HCHS/hchs-sol-sueno-"+str(filenumber)+".csv"
+     fileName=hchs_files_location+str(filenumber)+".csv"
 
      hc=hchs_light(fileName)
 
@@ -117,19 +140,22 @@ def runParticularData(filenumber, trans_days=50):
      ax.set_title('HCHS Actogram')
      plt.show()
 
-     print filenumber
+     print(("Filenumber: ", filenumber))
 
 
 def runAllFilesDLMO():
      """
-        Run through all the files and measure the DLMO predicted differences for the three models
+        Run through all the files and measure the DLMO predicted differences for the three models. 
+
+        This should run in parallel as it will take a file to run. This generates the hchs_model_diff file needed by the compare_hchs_manuscript program.
+
      """
      fl=get_all_hchs_files()
-     print "Total Files: ", len(fl)
+     print(("Total Files: ", len(fl)))
      allOutputs= Parallel(n_jobs=32)(delayed(get_diff)(f) for f in fl)
 
      
-     outfile=open('hchs_model_diff_new.csv', 'w')
+     outfile=open('hchs_model_diff.csv', 'w')
      outfile.write('Filename, SP_DLMO, VDP_DLMO, TP_DLMO, R_SP, R_VDP, R_TP, Est_Sleep_MP\n')
 
      for o in allOutputs:
@@ -139,6 +165,9 @@ def runAllFilesDLMO():
 
 
 def plotRandomSP(trans_days=100):
+    """
+    This plots are randomly chosen hchs light schedule with the single population model predictions for DLMO and CBT min
+    """
 
     fl=get_all_hchs_files()
     fileName=random.choice(fl)
@@ -159,45 +188,48 @@ def plotRandomSP(trans_days=100):
     plt.savefig('Modern_Light_actogram.eps')
     plt.show()
 
-    print fileName
+    print(("Filename chosen: ", fileName))
 
     
 def chooseRandomData(trans_days=50):
+    """ Get a randomly chosen hchs participant """
 
-     fl=get_all_hchs_files()
-     fileName=random.choice(fl)
-     hc=hchs_light(fileName)
+    fl=get_all_hchs_files()
+    fileName=random.choice(fl)
+    hc=hchs_light(fileName)
 
-     init=guessICData(hc.LightFunctionInitial, 0.0, length=trans_days)
-     initVDP=guessICDataVDP(hc.LightFunctionInitial, 0.0, length=trans_days)
-     initTwo=guessICDataTwoPop(hc.LightFunctionInitial, 0.0, length=trans_days)
+    init=guessICData(hc.LightFunctionInitial, 0.0, length=trans_days)
+    initVDP=guessICDataVDP(hc.LightFunctionInitial, 0.0, length=trans_days)
+    initTwo=guessICDataTwoPop(hc.LightFunctionInitial, 0.0, length=trans_days)
      
-     a=SinglePopModel(hc.LightFunctionInitial)
-     b=vdp_model(hc.LightFunctionInitial)
-     c=TwoPopModel(hc.LightFunctionInitial)
-     ent_angle=a.integrateModelData((0.0, 40.0*24.0), initial=init);
-     ent_angle_vdp=b.integrateModelData((0.0, 40.0*24.0), initial=initVDP);
-     ent_angle_two=c.integrateModelData((0.0, 40.0*24.0), initial=initTwo);
-     tsdf=a.getTS()
-     tsdf_vdp=b.getTS()
-     tsdf_two=c.getTS()
-     d1, d2, d3=record_diff(tsdf, tsdf_vdp, tsdf_two)
-     plt.figure()
-     ax=plt.gca()
-     acto=actogram(ax, tsdf) #add an actogram to those axes
-     acto.addCircadianPhases(tsdf_vdp, col='darkgreen')
-     acto.addCircadianPhases(tsdf_two, col='red')
-     ax.set_title('HCHS Actogram')
-     plt.show()
+    a=SinglePopModel(hc.LightFunctionInitial)
+    b=vdp_model(hc.LightFunctionInitial)
+    c=TwoPopModel(hc.LightFunctionInitial)
+    ent_angle=a.integrateModelData((0.0, 40.0*24.0), initial=init);
+    ent_angle_vdp=b.integrateModelData((0.0, 40.0*24.0), initial=initVDP);
+    ent_angle_two=c.integrateModelData((0.0, 40.0*24.0), initial=initTwo);
+    tsdf=a.getTS()
+    tsdf_vdp=b.getTS()
+    tsdf_two=c.getTS()
+    d1, d2, d3=record_diff(tsdf, tsdf_vdp, tsdf_two)
 
-     print fileName
+    
+    plt.figure()
+    ax=plt.gca()
+    acto=actogram(ax, tsdf) #add an actogram to those axes
+    acto.addCircadianPhases(tsdf_vdp, col='darkgreen')
+    acto.addCircadianPhases(tsdf_two, col='red')
+    ax.set_title('HCHS Actogram')
+    plt.show()
+
+    print(("Filename Chosen: ", fileName))
 
 
 
 
 def runAllShiftWorkers():
     """
-        Run through all the sw and make an actogram for their recorded light schedules
+        Run through all the shift workers in the data set and makes an actogram for their recorded light schedules
     """
     swlist=open('HCHS_ShiftWorkers_PID.csv').readlines()[1:]
 
@@ -206,19 +238,16 @@ def runAllShiftWorkers():
     
     allOutputs= Parallel(n_jobs=32)(delayed(chooseShiftWorker)(f) for f in swlist)
 
-    print "Total Number of files generated: ", sum(allOutputs)
+    print(("Total Number of files generated: ", sum(allOutputs)))
      
     
-
-
-
      
 
 def chooseShiftWorker(sw, trans_days=50.0):
     """Choose a shift worker and make an actogram"""
 
     try:
-        fileName="../../HumanData/HCHS/hchs-sol-sueno-"+sw+".csv"
+        fileName=hchs_files_location+sw+".csv"
 
         hc=hchs_light(fileName)
 
@@ -234,7 +263,7 @@ def chooseShiftWorker(sw, trans_days=50.0):
         dlmo=acto.getDLMOtimes()
         #print "Phase Coherence DLMO: ", phase_coherence_clock(dlmo)
         saveString=sw+"\t"+str(phase_coherence_clock(dlmo))
-        print saveString 
+        print(saveString)
     
         mytitle='HCHS Actogram '+sw
         ax.set_title(mytitle)
@@ -254,17 +283,17 @@ if __name__=='__main__':
 
     
     
-     runAllFilesDLMO()
+    runAllFilesDLMO()
 
-     sys.exit(0)
+    sys.exit(0)
      
-     if len(sys.argv)<2:
-          plotRandomSP()
-     else:
-          if len(sys.argv)==2:
-               runParticularData(sys.argv[1])
-          else:
-               runParticularData(sys.argv[1], int(sys.argv[2]))
+    if len(sys.argv)<2:
+        plotRandomSP()
+    else:
+        if len(sys.argv)==2:
+            runParticularData(sys.argv[1])
+        else:
+            runParticularData(sys.argv[1], int(sys.argv[2]))
 
 
 

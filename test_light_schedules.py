@@ -6,6 +6,7 @@ scenarios.
 
 
 """
+from __future__ import print_function
 
 import numpy as np
 import scipy as sp
@@ -13,6 +14,8 @@ import pylab as plt
 from actogram import *
 from LightSchedule import *
 from singlepop_model import *
+from twopop_model import *
+from vdp_model import *
 from stroboscopic import *
 
 
@@ -41,7 +44,8 @@ def actogramRegularLight():
 
 
 def actogramShiftWork(dayson=5, daysoff=2):
-    """Simulate shift work schedule using the SP model:
+    """
+    Simulate shift work schedule using the SP model:
     compareShiftWork(dayson=5, daysoff=2)
     """
 
@@ -87,9 +91,9 @@ def JetLagActogram(shift):
     """
 
     if (shift<0.0):
-        print "Simulating westbound travel by ", abs(shift), " time zones"
+        print(("Simulating westbound travel by ", abs(shift), " time zones"))
     else:
-        print "Simulating eastbound travel by ", abs(shift), " time zones"
+        print(("Simulating eastbound travel by ", abs(shift), " time zones"))
 
 
 
@@ -118,5 +122,5 @@ def JetLagActogram(shift):
 if __name__=='__main__':
 
     JetLagActogram(8.0)
-    #actogramRegularLight()
-    #actogramShiftWork(5,2)
+    actogramRegularLight()
+    actogramShiftWork(5,2)

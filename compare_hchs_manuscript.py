@@ -1,3 +1,22 @@
+"""
+File to generate comparisons between the models for data recorded as part of
+the HCHS publicly available data set. 
+
+https://sleepdata.org/datasets/hchs
+
+
+"""
+from __future__ import print_function
+
+
+#Set the path to the downloaded HCHS data files on YOUR system!!
+from builtins import map
+from builtins import str
+from builtins import range
+hchs_data_location='../../HumanData/HCHS/hchs-sol-sueno-'
+
+
+
 from circular_stats import *
 import pandas as pd
 import scipy as sp
@@ -21,6 +40,9 @@ from twopop_model import *
 
 convert_mil_time=lambda x: pd.DatetimeIndex(x).hour+pd.DatetimeIndex(x).minute/60.0+pd.DatetimeIndex(x).second/3600.0
 
+
+
+
 def findCircularCorr(data1, criteria=None):
     """Find the Circular Correlation between the DLMO Times and the measured marker for the three models. Assume the data is given in military time"""
     if criteria is None:
@@ -31,6 +53,30 @@ def findCircularCorr(data1, criteria=None):
     return((spVal, tp, vdp))
 
 
+def findKeyDLMOTimes(tsdf):
+    """Find the DLMO and CBT times for a given time series prediction"""
+
+    wrapped_time=np.round([fmod(x, 24.0) for x in list(tsdf.Time)],2)
+    df=pd.DataFrame({'Time': wrapped_time, 'Phase': tsdf.Phase})
+    df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
+    mean_func=sp.interpolate.interp1d(np.array(df2['Circular_Mean']), np.array(df2.index))
+    return(mean_func(1.309))
+
+
+
+def record_diff(tsdfS, tsdfV, tsdfT):
+     """Find the differences in the DLMO timing of the three models for that given light schedule"""
+
+     d1=findKeyDLMOTimes(tsdfS)
+     d2=findKeyDLMOTimes(tsdfV)
+     d3=findKeyDLMOTimes(tsdfT)
+
+     return((d1,d2,d3))
+
+
+
+
+ 
 
 hchs2=pd.read_csv('hchs_model_diff.csv').rename(columns=lambda x: x.strip())
 column_list=['PID', 'SAWA9', 'SAWA339', 'SHIFTWORKERYN', 'SAWA174', 'SAWA313', 'SAWA315', 'SAWA316', 'SAWA323', 'RMEQ', 'SAWA325', 'SAWA326', 'SAWA327', 'SAWA328', 'SAWA317']
@@ -89,7 +135,7 @@ hchs['diff_vdpSODLMO']=pd.Series(diff_vdpSODLMO, index=hchs.index)
 
 #Find Major differences in the model predictions
 criteria=(abs(hchs.diff_spvdp)>1.0) #& (abs(hchs.diff_sptp)<0.5)
-criteriaInt=map(int, criteria)
+criteriaInt=list(map(int, criteria))
 hchs['Model_Diff']=pd.Series(criteriaInt, index=hchs.index)
 
 #Save a copy of the list of model diff
@@ -97,9 +143,9 @@ list_of_discrepancies=list(hchs[criteria].Filename)
 criteriaNOT=[not c for c in criteria]
 list_of_agreements=list(hchs[criteriaNOT].Filename)
 
-print "Number of Model Diff: ", sum(criteriaInt)
-print "Percentage of Model Diff: ", sum(criteriaInt)/float(hchs.shape[0])*100
-print "Total number of light schedules considered", hchs.shape
+print(("Number of Model Diff: ", sum(criteriaInt)))
+print(("Percentage of Model Diff: ", sum(criteriaInt)/float(hchs.shape[0])*100))
+print(("Total number of light schedules considered", hchs.shape))
 
 
 x=np.linspace(0.0,24.0,200)
@@ -112,15 +158,16 @@ for f in list_of_discrepancies:
             while (len(f)<8):
                 f='0'+f
     
-        filename='../../HumanData/HCHS/hchs-sol-sueno-'+f+'.csv'
+        filename=hchs_data_location+f+'.csv'
         ls=hchs_light(filename)
         av_data=ls.data.groupby(by=['TimeCount']).mean()
         lf=InterpolatedUnivariateSpline(av_data.index, av_data.Lux, k=1)
-        y_vals=map(lf,x)
+        y_vals=list(map(lf,x))
         for i in range(len(x)):
             data_list.append((str(f), 'Disagree', x[i], LightLog(y_vals[i])))
     except:
-        print "Error with file: ", f
+        print(("Error with file: ", f))
+        
 
 for f in list_of_agreements:
     try:
@@ -130,15 +177,16 @@ for f in list_of_agreements:
             while (len(f)<8):
                 f='0'+f
     
-        filename='../../HumanData/HCHS/hchs-sol-sueno-'+f+'.csv'
+        filename=hchs_data_location+f+'.csv'
         ls=hchs_light(filename)
         av_data=ls.data.groupby(by=['TimeCount']).mean()
         lf=InterpolatedUnivariateSpline(av_data.index, av_data.Lux, k=1)
-        y_vals=map(lf,x)
+        y_vals=list(map(lf,x))
         for i in range(len(x)):
             data_list.append((str(f), 'Agree', x[i], LightLog(y_vals[i])))
     except:
-        print "Error with file (agreement): ", f
+        print(("Error with file (agreement): ", f))
+        
 
 
 lightSchedulesD=pd.DataFrame(data_list, columns=['PID', 'Agreement', 'Time', 'Log_Lux'])        
@@ -175,30 +223,14 @@ ax2.set_xticks([15,18,21,24])
 ax2.text(15.5,23.0,'(a)')
 
 plt.tight_layout()
-plt.savefig('../../Figures/model_diff.eps', dpi=1200)
+#This creates the figure from the file
+plt.savefig('model_diff.eps', dpi=1200)
 plt.show()
 
 
-def findKeyDLMOTimes(tsdf):
-    """Find the DLMO and CBT times for a given time series prediction"""
-
-    wrapped_time=np.round(map(lambda x: fmod(x, 24.0), list(tsdf.Time)),2)
-    df=pd.DataFrame({'Time': wrapped_time, 'Phase': tsdf.Phase})
-    df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
-    mean_func=sp.interpolate.interp1d(np.array(df2['Circular_Mean']), np.array(df2.index))
-    return(mean_func(1.309))
+#--------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-def record_diff(tsdfS, tsdfV, tsdfT):
-     """Find the differences in the DLMO timing of the three models for that given light schedule"""
-
-     d1=findKeyDLMOTimes(tsdfS)
-     d2=findKeyDLMOTimes(tsdfV)
-     d3=findKeyDLMOTimes(tsdfT)
-
-     return((d1,d2,d3))
-    
 
 #Find the diff for the average agree light schedule
 agreeOnlyMeans=lightSchedulesD.loc[lightSchedulesD['Agreement']=='Agree'].groupby(by=['Time'])['Log_Lux'].mean()
@@ -220,7 +252,7 @@ tsdf=a.getTS()
 tsdf_vdp=b.getTS()
 tsdf_two=c.getTS()
 
-print "Average DLMO diff for Agree: ", np.array(record_diff(tsdf, tsdf_vdp, tsdf_two))
+print(("Average DLMO diff for Agree: ", np.array(record_diff(tsdf, tsdf_vdp, tsdf_two))))
 
 #Add the diff for average disagree schedule
 
@@ -243,5 +275,5 @@ tsdf=a.getTS()
 tsdf_vdp=b.getTS()
 tsdf_two=c.getTS()
 
-print "Average DLMO diff for Disagree: ", np.array(record_diff(tsdf, tsdf_vdp, tsdf_two))
+print(("Average DLMO diff for Disagree: ", np.array(record_diff(tsdf, tsdf_vdp, tsdf_two))))
     
