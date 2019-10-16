@@ -1,13 +1,15 @@
 # HumanCircadianRhythmsSimPackage
 
-Tools for simulating human circadian rhythms for a given light schedule. This package implements three models for human circadian rhythms
-and some tools for visualizing the rhythms in python.
+Tools for simulating human circadian rhythms for a given light schedule. This package implements three models for human circadian rhythms and some tools for visualizing the rhythms in python.
 
 I have (7/2019) updated this library to use Python 3. It should be compatible with python 2 although I won't be
 spending much time on ensuring this in the future. 
 
-This package contains python programs for simulating the single population, two population and van der Pol models for Human 
-Circadian rhythms for a given light schedule. 
+The background for these models can be found in our article published in the Journal of Biological Rhythms:
+
+https://journals.sagepub.com/eprint/CZRXAPFRWA94ZMFDZWWW/full
+
+Enjoy!
 
 Dependencies:
 
@@ -26,6 +28,18 @@ This package makes use of the most recent versions of the following python libra
 The file compare_models_actograms contains tools for simulating the three models under basic light schedules including a Regular Light Schedule, Shift Work and Jetlag (slam shifts).
 
 The file test_light_schedules also can be use to create some actograms for some basic schedules (regular, shift work, jetlag).
+
+To get you up and running try the commands
+
+python test_light_schedules.py
+
+This will show three actograms with the CBT and DLMO times indicated. 
+
+You can also run the program:
+
+python compare_models_actograms.py
+
+which will show a comparison of predictions between models. 
 
 
 # Create your own light schedules
