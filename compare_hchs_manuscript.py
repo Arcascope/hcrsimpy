@@ -198,7 +198,7 @@ ax2= plt.subplot(G[0, 0])
 ax1=plt.subplot(G[0, 1])
 
 
-sbn.lineplot(x="Time", y="Log_Lux", data=lightSchedulesD, hue='Agreement', style='Agreement', ci=None, lw=2.0, ax=ax1, legend=False);
+sbn.lineplot(x="Time", y="Log_Lux", data=lightSchedulesD, hue='Agreement', style='Agreement', ci=None, lw=2.0, ax=ax1, legend=False, palette=["green", "blue"]);
 #handles, labels = ax.get_legend_handles_labels()
 #ax.legend(handles=handles[1:], labels=labels[1:])
 #ax1.set_yscale('log', basex=10)
@@ -211,8 +211,8 @@ ax1.set_xticks([0,6,12,18,24])
 
 
 #Add a Regression plot to show differences in the predictions
-sbn.regplot('SP_DLMO', 'VDP_DLMO', data=hchs[criteriaNOT], color='green', fit_reg=False, marker='o', scatter_kws={"s": 7, "facecolor":'none', "alpha":0.1}, ax=ax2);
-sbn.regplot('SP_DLMO', 'VDP_DLMO', data=hchs[criteria], color='blue', fit_reg=False, marker='x', scatter_kws={"s": 7,  "alpha":0.1}, ax=ax2);
+sbn.regplot('SP_DLMO', 'VDP_DLMO', data=hchs[criteriaNOT], color='green', fit_reg=False, marker='o', scatter_kws={"s": 7, "facecolor":'none'}, ax=ax2);
+sbn.regplot('SP_DLMO', 'VDP_DLMO', data=hchs[criteria], color='blue', fit_reg=False, marker='x', scatter_kws={"s": 9}, ax=ax2);
 ax2.set_xlabel('SP DLMO Time')
 ax2.set_ylabel('VDP DLMO Time')
 ax2.set_xlim(15,24)

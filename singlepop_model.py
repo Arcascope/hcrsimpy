@@ -37,20 +37,44 @@ class SinglePopModel(object):
     def __init__(self, LightFun):
         """ Create a single population model by passing in a Light Function as a function of time """
         #Read the parameters from a file
-        self.getParameters()
+        self.setParameters()
         self.Light=LightFun
 
 
-    def getParameters(self):
+    def setParameters(self):
         """Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file"""
 
         try:
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("optimalParams.dat", 'r').readlines()[0].split()))        
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("optimalParams.dat", 'r').readlines()[0].split()))        
         except:
-            print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
-    
+            #print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
 
+        
+    def updateParameters(self, paramDict):
+        """Update the model parameters using a passed in parameter dictionary. Any parameters not included
+        in the dictionary will be set to the default values"""
+
+        params=['w0', 'K','gamma', 'Beta1', 'A1', 'A2', 'BetaL1', 'BetaL2', 'sigma', 'G', 'alpha_0', 'delta', 'p', 'I0']
+
+        if 'tau' in paramDict.keys():
+            paramDict['w0']=2*sp.pi/paramDict['tau']
+
+        
+        #Now set the parameters
+        for k in paramDict.keys():
+            mycode='self.'+k+"=paramDict[\'"+k+"\']"
+            exec(mycode)
+
+
+    def getParameters(self):
+        """Get a dictionary of the current parameters being used by the model object"""
+
+        current_params={ 'w0':self.w0, 'K':self.K,'gamma':self.gamma, 'Beta1':self.Beta1, 'A1':self.A1, 'A2':self.A2, 'BetaL1':self.BetaL1, 'BetaL2':self.BetaL2, 'sigma':self.sigma, 'G':self.G, 'alpha_0':self.alpha_0, 'delta':self.delta, 'p':self.p, 'I0':self.I0}
+        
+        return(current_params)
+            
+            
 
 
     def updatePeriod(self, newVal):
@@ -73,8 +97,8 @@ class SinglePopModel(object):
         n=y[2];
 
         Bhat=self.G*(1.0-n)*self.alpha0(t);
-        LightAmp=self.A1*0.5*Bhat*(1.0-pow(R,4.0))*sp.cos(Psi+self.BetaL)+self.A2*0.5*Bhat*R*(1.0-pow(R,8.0))*sp.cos(2.0*Psi+self.BetaL2);
-        LightPhase=self.sigma*Bhat-self.A1*Bhat*0.5*(pow(R,3.0)+1.0/R)*sp.sin(Psi+self.BetaL)-self.A2*Bhat*0.5*(1.0+pow(R,8.0))*sp.sin(2.0*Psi+self.BetaL2);
+        LightAmp=self.A1*0.5*Bhat*(1.0-pow(R,4.0))*sp.cos(Psi+self.BetaL1)+self.A2*0.5*Bhat*R*(1.0-pow(R,8.0))*sp.cos(2.0*Psi+self.BetaL2);
+        LightPhase=self.sigma*Bhat-self.A1*Bhat*0.5*(pow(R,3.0)+1.0/R)*sp.sin(Psi+self.BetaL1)-self.A2*Bhat*0.5*(1.0+pow(R,8.0))*sp.sin(2.0*Psi+self.BetaL2);
 
         dydt=np.zeros(3)
 

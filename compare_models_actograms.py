@@ -1,3 +1,9 @@
+"""
+This file allows for the comparision of the predictions for the three models and shows the results on an actogram
+"""
+
+
+
 from __future__ import print_function
 import numpy as np
 import scipy as sp
@@ -29,47 +35,8 @@ def findKeyTimes(tsdf):
     return((mean_func(sp.pi), mean_func(1.309)))
 
 
-def compareWrightCamping():
-    """Compare the model predictions for the wright camping data"""
 
-    wd=WrightLightData()
-    wd.plotLight()
-    LightArt=lambda t: wd.LightFunction(t, art=True)
-    LightNat=lambda t: wd.LightFunction(t, art=False)
-
-    #Define the siz model runs to perform
-    a1=SinglePopModel(LightArt)
-    v1=vdp_model(LightArt)
-    t1=TwoPopModel(LightArt)
-
-    a2=SinglePopModel(LightNat)
-    v2=vdp_model(LightNat)
-    t2=TwoPopModel(LightNat)
-
-    models=[a1,v1,t1, a2, v2, t2]
-
-    CBT=[]
-    DLMO=[]
-
-    for m in models:
-        init=m.integrateTransients()
-        ent_angle=m.integrateModel(24*40, initial=init);
-        tsdf=m.getTS()
-        CBTd, DLMOd=findKeyTimes(tsdf)
-        CBT.append(CBTd)
-        DLMO.append(DLMOd)
-
-    print(("SP DLMO: ",DLMO[0]-DLMO[3]))
-    print(("VDP DLMO: ", DLMO[1]-DLMO[4]))
-    print(("TP DLMO: ", DLMO[2]-DLMO[5]))
     
-
-
-
-
-
-
-
 
     
 
@@ -278,8 +245,6 @@ def JetLagActogram(shift):
 
 if __name__=='__main__':
 
-    #compareWrightCamping()
-    #regularRoutineStats()
     JetLagActogram(-10.0)
     #compareRegularLight()
     #compareShiftWork(15,10)

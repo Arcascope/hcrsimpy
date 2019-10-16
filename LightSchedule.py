@@ -429,17 +429,20 @@ class hchs_light(object):
 class JennyDataReader(object):
     """BL is the school year, P1 is the summer months"""
 
-    def __init__(self,num,labelType):
+    def __init__(self,filename):
 
-        if labelType=='BL':
+        if (('BL' in filename) or ('B0' in filename)):
             self.label='school'
-        if labelType=='P1':
+        if ('P1' in filename):
             self.label='summer'
 
 
-
-        filename="~/work/Research/gpu/Human/HumanData/DATA/"+str(num)+str(labelType)+"_epoch.csv"
-        fileData=pd.read_csv(filename, delimiter=',', skiprows=3, parse_dates={'Date_Time': ['Date','Time'] }, date_parser=parse_dt) 
+        if not ('HumanData' in filename):
+            Fullfilename="~/work/Research/gpu/Human/HumanData/DATA/"+filename
+        else:
+            Fullfilename=filename
+            
+        fileData=pd.read_csv(Fullfilename, delimiter=',', skiprows=3, parse_dates={'Date_Time': ['Date','Time'] }, date_parser=parse_dt) 
         fileData=fileData.set_index('Date_Time')
         #Make the Sleep column categorical
         fileData['Sleep'] = fileData['Sleep or Awake?'].astype('category')
