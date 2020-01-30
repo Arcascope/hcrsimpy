@@ -223,7 +223,25 @@ def guessICData(LightFunc, time_zero, length=150, show=False):
     return(initial)
     
 
+def measureSWBadness(LightFunc, num_days=150):
+    """
+    Compute the badness of a sw schedule
+    """
 
+    a=SinglePopModel(LightFunc)
+    new_init=a.integrateTransients()
+    a.integrateModel(num_days*24.0, initial=new_init)
+    res=a.getTS()
+    print(res)
+
+
+
+if __name__=="__main__":
+    LLight=lambda t: RegularLight(t,150.0,16.0,24.0)
+    measureSWBadness(LLight)
+    
+    
+    
 
 
     
