@@ -110,9 +110,9 @@ class SinglePopModel(object):
 
 
 
-    def integrateModel(self, tend, initial=[1.0,0.0, 0.0]):
+    def integrateModel(self, tend, initial=[1.0,0.0, 0.0],dt=0.1):
         """ Integrate the model forward in time. The parameters are tend= the end time to stop the simulation and initial=[R, Psi, n]"""
-        dt=0.1
+        
         self.ts=np.arange(0.0,tend,dt)
         initial[1]=fmod(initial[1], 2*sp.pi) #start the initial phase between 0 and 2pi
 
@@ -223,16 +223,9 @@ def guessICData(LightFunc, time_zero, length=150, show=False):
     return(initial)
     
 
-def measureSWBadness(LightFunc, num_days=150):
-    """
-    Compute the badness of a sw schedule
-    """
 
-    a=SinglePopModel(LightFunc)
-    new_init=a.integrateTransients()
-    a.integrateModel(num_days*24.0, initial=new_init)
-    res=a.getTS()
-    print(res)
+
+    
 
 
 
