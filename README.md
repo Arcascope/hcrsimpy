@@ -1,4 +1,4 @@
-# HumanCircadianRhythmsSimPackage
+# Human Circadian Rhythms Simulation Package in Python
 
 Tools for simulating human circadian rhythms for a given light schedule. This package implements three models for human circadian rhythms and some tools for visualizing the rhythms in python.
 
