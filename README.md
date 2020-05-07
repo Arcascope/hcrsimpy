@@ -11,6 +11,9 @@ https://journals.sagepub.com/eprint/CZRXAPFRWA94ZMFDZWWW/full
 
 Enjoy!
 
+## Installing the Package
+
+
 Dependencies:
 
 This package makes use of the most recent versions of the following python libraries:
@@ -22,6 +25,11 @@ This package makes use of the most recent versions of the following python libra
 5. numba
 6. seaborn
 7. statsmodels
+
+
+
+
+
 
 # Simulating Schedules:
 
