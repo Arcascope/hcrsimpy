@@ -64,7 +64,6 @@
 
 
 #Text outputs
-*.txt
 *.csv
 
 #Emacs
