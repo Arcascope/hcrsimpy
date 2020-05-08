@@ -63,7 +63,7 @@ def regularRoutineStats():
         resultsSP.append((i, DLMO, CBT))
 
         #Add vdp
-        v=vdp_model(LightFunReg)
+        v=vdp_forger99_model(LightFunReg)
         init=v.integrateTransients()
         ent_angle=v.integrateModel(24*40, initial=init);
         tsdf2=v.getTS()
@@ -121,7 +121,7 @@ def compareRegularLight(Intensity=150.0):
     acto=actogram(ax, tsdf) #add an actogram to those axes
 
     #Add vdp
-    v=vdp_model(LightFunReg)
+    v=vdp_forger99_model(LightFunReg)
     init=v.integrateTransients()
     ent_angle=v.integrateModel(24*40, initial=init);
     tsdf2=v.getTS()
@@ -151,7 +151,7 @@ def compareShiftWork(dayson=5, daysoff=2):
     acto=actogram(ax, tsdf) #add an actogram to those axes
 
     #Add vdp
-    v=vdp_model(LightFun)
+    v=vdp_forger99_model(LightFun)
     init=v.integrateTransients()
     ent_angle=v.integrateModel(24*40, initial=init);
     tsdf2=v.getTS()
@@ -183,7 +183,7 @@ def compareActogram(Light):
 
     #Add vdp
 
-    v=vdp_model(Light)
+    v=vdp_forger99_model(Light)
     init=v.integrateTransients()
     ent_angle=v.integrateModel(24*40, initial=init);
     tsdf2=v.getTS()
@@ -218,7 +218,7 @@ def JetLagActogram(shift):
 
 
     #Add vdp
-    v=vdp_model(LightFunReg)
+    v=vdp_forger99_model(LightFunReg)
     init=v.integrateTransients()
     v.Light=JetLag
     ent_angle=v.integrateModel(24*40, initial=init);
