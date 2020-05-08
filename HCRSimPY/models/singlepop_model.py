@@ -1,11 +1,25 @@
 
 """
+This file defines the single population model from the paper:
+
+Hannay, K. M., Booth, V., & Forger, D. B. (2019). Macroscopic Models for Human Circadian Rhythms.
+Journal of Biological Rhythms, 34(6), 658–671. https://doi.org/10.1177/0748730419878298
+
+Here are some marker states for that model (all equals should be read as approx)
+
 CBT=DLMO+7hrs
 CBT=DLMO_mid+2hrs
 CBT=circadian phase pi in the model
 DLMO=circadian phase 5pi/12=1.309 in the model
-
 MelatoninOffset=DLMO+10hrs
+
+Note, this model rotates counterclockwise in accordance with the usual convention
+in mathematics. The VDP family of models rotate clockwise. This can be confusing when trying
+to compare phase plane plots between the models, but is fixable with a simple rotation.
+
+An effort will be made to have the core methods align between all of the models implemented
+in this package. 
+
 """
 from __future__ import print_function
 
@@ -33,28 +47,46 @@ from HCRSimPY.utils import circular_stats
 
 
 class SinglePopModel(object):
-    """A simple python program to integrate the human circadian rhythms model for a given light schedule"""
+    """A simple python program to integrate the human circadian rhythms model (Hannay et al 2019) for a given light schedule"""
 
     def __init__(self, LightFun):
-        """ Create a single population model by passing in a Light Function as a function of time """
+        """
+        Create a single population model by passing in a Light Function as a function of time.
+
+        This will create a model with the default parameter values as given in Hannay et al 2019.
+
+        This class can be used to simulate and plot the results of the given light schedule on the circadian phase
+        and amplitude.
+        """
         #Read the parameters from a file
         self.setParameters()
         self.Light=LightFun
 
 
     def setParameters(self):
-        """Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file"""
+        """
+        Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file.
 
+        setParameters()
+
+        """
         try:
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("optimalParams.dat", 'r').readlines()[0].split()))
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("../data/optimalParams.dat", 'r').readlines()[0].split()))
         except:
-            #print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
+            print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
 
 
     def updateParameters(self, paramDict):
-        """Update the model parameters using a passed in parameter dictionary. Any parameters not included
-        in the dictionary will be set to the default values"""
+        """
+        Update the model parameters using a passed in parameter dictionary. Any parameters not included
+        in the dictionary will be set to the default values.
+
+        updateParameters(paramDict)
+
+        Returns null, changes the parameters stored in the class instance
+
+        """
 
         params=['w0', 'K','gamma', 'Beta1', 'A1', 'A2', 'BetaL1', 'BetaL2', 'sigma', 'G', 'alpha_0', 'delta', 'p', 'I0']
 
@@ -69,30 +101,48 @@ class SinglePopModel(object):
 
 
     def getParameters(self):
-        """Get a dictionary of the current parameters being used by the model object"""
+        """Get a dictionary of the current parameters being used by the model object.
+
+        getParameters()
+
+        returns a dict of parameters
+        """
 
         current_params={ 'w0':self.w0, 'K':self.K,'gamma':self.gamma, 'Beta1':self.Beta1, 'A1':self.A1, 'A2':self.A2, 'BetaL1':self.BetaL1, 'BetaL2':self.BetaL2, 'sigma':self.sigma, 'G':self.G, 'alpha_0':self.alpha_0, 'delta':self.delta, 'p':self.p, 'I0':self.I0}
 
         return(current_params)
 
 
-
-
     def updatePeriod(self, newVal):
-        """Change the period of the circadian clock, should be put in as hours"""
+        """
+        Change the period of the circadian clock, should be put in as hours
+
+        updatePeriod(newVal)
+
+        changes the self.w0 parameter for the model.
+
+        """
         if (newVal >=10.0 and newVal<=35.0):
             self.w0=2*sp.pi/newVal
         else:
-            print("The new circadian period should be in hours, it looks like you forgot this so the period was not updated")
+            print("The new circadian period should be in hours, it looks like you forgot this so the period was not updated.")
 
 
     def alpha0(self,t):
-        """A helper function for modeling the light input"""
+        """A helper function for modeling the light input processing"""
         return(self.alpha_0*pow(self.Light(t), self.p)/(pow(self.Light(t), self.p)+self.I0));
 
 
     def derv(self,t,y):
-        """ This defines the ode system for the single population model """
+        """
+        This defines the ode system for the single population model.
+
+        derv(self,t,y)
+
+
+        returns dydt numpy array.
+
+        """
         R=y[0];
         Psi=y[1]
         n=y[2];
@@ -112,7 +162,19 @@ class SinglePopModel(object):
 
 
     def integrateModel(self, tend, initial=[1.0,0.0, 0.0]):
-        """ Integrate the model forward in time. The parameters are tend= the end time to stop the simulation and initial=[R, Psi, n]"""
+        """ Integrate the model forward in time.
+
+        integrateModel(tend, initial=[1.0,0.0, 0.0])
+
+        tend: float giving the final time to integrate to.
+        initial: initial dynamical state
+        The parameters are tend= the end time to stop the simulation and initial=[R, Psi, n]
+
+        Writes the integration results into the scipy array self.results.
+
+        Returns the circadian phase (in hours) at the ending time for the system.
+
+        """
         dt=0.1
         self.ts=np.arange(0.0,tend,dt)
         initial[1]=fmod(initial[1], 2*sp.pi) #start the initial phase between 0 and 2pi
@@ -123,19 +185,35 @@ class SinglePopModel(object):
         ent_angle=fmod(self.results[-1,1], 2*sp.pi)*24.0/(2.0*sp.pi) #angle at the lights on period
         return(ent_angle)
 
-    def integrateModelData(self, timespan, initial):
-        """ Integrate the model using a light function defined by data
-        integrateModelData(self, timespan, initial)
+    def integrateModelData(self, timespan, initial, dt=0.1):
+        """Integrate the model using a light function defined by data
+
+        integrateModelData(timespan, initial, dt=0.1)
+
+        The timespan is a tuple of the start and end times (0.0,10.0)
+        The initial are the initial conditions for the dynamical system
+        The dt tells scipy how often to save the dynamical state of the system.
+
+        Writes the results into the numpy array self.results.
+
         """
-        dt=0.1
         self.ts=np.arange(timespan[0], timespan[1], dt)
         initial[1]=fmod(initial[1], 2*sp.pi) #start the initial phase between 0 and 2pi
         r=sp.integrate.solve_ivp(self.derv,(timespan[0],timespan[1]), initial, t_eval=self.ts, method='Radau')
 
         self.results=np.transpose(r.y)
 
+
+
     def integrateTransients(self, numdays=50):
-        """Integrate the model for 50 days to get rid of any transients, returns the endpoint to be used as initial conditions"""
+        """
+        Integrate the model for numdays days to get rid of any transients,
+        returns the endpoint to be used as initial conditions.
+
+        integrateTransients(numdays=50)
+
+        Returns a numpy array giving the end state for the model
+        """
 
         tend=numdays*24.0 #need to change this back to 500
         r=sp.integrate.solve_ivp(self.derv,(0,tend), [0.7, 0.0, 0.01], t_eval=[tend], method='Radau')
@@ -144,7 +222,13 @@ class SinglePopModel(object):
 
 
     def findKeyTimes(self):
-        """Find the mean circadian phases at different times in the data set as well as the variation"""
+        """Find the mean circadian phases at different times in the data set as well as the variation.
+
+        findKeyTimes()
+
+        Returns a pandas data frame with the circular mean of the phase coherence at each time point
+
+        """
         wrapped_time=np.round([fmod(x, 24.0) for x in self.ts],2)
         df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})
 
@@ -156,7 +240,13 @@ class SinglePopModel(object):
 
 
     def findAveragePhase(self):
-        """Find the average circadian phase for each clock time in the simulation. Returns a pandas data frame with index given by the wrapped time, the mean phase across the simulation, phase coherence and number of samples"""
+        """Find the average circadian phase for each clock time in the simulation.
+
+        findAveragePhase()
+
+        Returns a pandas data frame with index given by the wrapped time, the mean phase across the simulation, phase coherence and number of samples
+
+        """
 
         wrapped_time=np.round([fmod(x, 24.0) for x in self.ts],2)
         df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})
@@ -165,8 +255,16 @@ class SinglePopModel(object):
 
         return(df2)
 
+
+
     def getTS(self, addMelatonin=True):
-        """Return a time series data frame for the system"""
+        """
+        Return a time series data frame for the system. Has a very, very simple melatonin state prediction which is off by default
+
+        getTS(self, addMelatonin=True)
+
+        returns a pandas data frame with the Time, Light_Level in lux, Phase (radians), R (amplitude), n (light activation variable) as columns
+        """
 
         light_ts=list(map(self.Light, self.ts))
         ts=pd.DataFrame({'Time': self.ts, 'Light_Level':light_ts, 'Phase': self.results[:,1], 'R': self.results[:,0], 'n': self.results[:,2]})
