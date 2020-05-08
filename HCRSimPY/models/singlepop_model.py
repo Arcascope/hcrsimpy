@@ -18,7 +18,7 @@ in mathematics. The VDP family of models rotate clockwise. This can be confusing
 to compare phase plane plots between the models, but is fixable with a simple rotation.
 
 An effort will be made to have the core methods align between all of the models implemented
-in this package. 
+in this package.
 
 """
 from __future__ import print_function
@@ -68,6 +68,8 @@ class SinglePopModel(object):
         Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file.
 
         setParameters()
+
+        No return value
 
         """
         try:
@@ -186,7 +188,8 @@ class SinglePopModel(object):
         return(ent_angle)
 
     def integrateModelData(self, timespan, initial, dt=0.1):
-        """Integrate the model using a light function defined by data
+        """
+        Integrate the model using a light function defined by data
 
         integrateModelData(timespan, initial, dt=0.1)
 
@@ -219,6 +222,39 @@ class SinglePopModel(object):
         r=sp.integrate.solve_ivp(self.derv,(0,tend), [0.7, 0.0, 0.01], t_eval=[tend], method='Radau')
         results_trans=np.transpose(r.y)
         return(results_trans[-1,:])
+
+
+    def getTS(self, addMelatonin=True):
+        """
+        Return a time series data frame for the system. Has a very, very simple melatonin state prediction which is off by default
+
+        getTS(self, addMelatonin=True)
+
+        returns a pandas data frame with the Time, Light_Level in lux, Phase (radians), R (amplitude), n (light activation variable) as columns
+        """
+
+        light_ts=list(map(self.Light, self.ts))
+        ts=pd.DataFrame({'Time': self.ts, 'Light_Level':light_ts, 'Phase': self.results[:,1], 'R': self.results[:,0], 'n': self.results[:,2]})
+
+        if (addMelatonin):
+            melatonin=[]
+            light_threshold=100.0 #half max in melatonin suppression
+
+            for i in range(self.results.shape[0]):
+                phase=fmod(self.results[i,1], 2*sp.pi)
+
+                if ((phase>=1.309) and (phase <= 3.92) and (light_ts[i]<=light_threshold)):
+                    melatonin.append(1.0)
+                else:
+                    melatonin.append(0.0)
+
+
+            ts['Melatonin']=np.array(melatonin)
+
+
+
+
+        return(ts)
 
 
     def findKeyTimes(self):
@@ -254,41 +290,6 @@ class SinglePopModel(object):
         df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
 
         return(df2)
-
-
-
-    def getTS(self, addMelatonin=True):
-        """
-        Return a time series data frame for the system. Has a very, very simple melatonin state prediction which is off by default
-
-        getTS(self, addMelatonin=True)
-
-        returns a pandas data frame with the Time, Light_Level in lux, Phase (radians), R (amplitude), n (light activation variable) as columns
-        """
-
-        light_ts=list(map(self.Light, self.ts))
-        ts=pd.DataFrame({'Time': self.ts, 'Light_Level':light_ts, 'Phase': self.results[:,1], 'R': self.results[:,0], 'n': self.results[:,2]})
-
-        if (addMelatonin):
-            melatonin=[]
-            light_threshold=100.0 #half max in melatonin suppression
-
-            for i in range(self.results.shape[0]):
-                phase=fmod(self.results[i,1], 2*sp.pi)
-
-                if ((phase>=1.309) and (phase <= 3.92) and (light_ts[i]<=light_threshold)):
-                    melatonin.append(1.0)
-                else:
-                    melatonin.append(0.0)
-
-
-            ts['Melatonin']=np.array(melatonin)
-
-
-
-
-        return(ts)
-
 
 
 

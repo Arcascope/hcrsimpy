@@ -4,4 +4,4 @@
 
 from .singlepop_model import SinglePopModel
 from .twopop_model import TwoPopModel
-from .vdp_model import vdp_model
+from .vdp_forger99_model import vdp_forger99_model

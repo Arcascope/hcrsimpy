@@ -16,8 +16,6 @@ Rather than the parameters from the original paper.
 
 """
 
-
-
 from builtins import map
 from builtins import range
 from builtins import object
@@ -37,7 +35,7 @@ from HCRSimPY.light_schedules import *
 
 
 class vdp_forger99_model(object):
-    """Implemetation of the VDP based model Simpler Model """"
+    """Implemetation of the VDP based model Simpler Model """
 
     def __init__(self, LightFun):
         """
