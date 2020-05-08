@@ -6,21 +6,24 @@ scenarios.
 
 
 """
+
+
+
 from __future__ import print_function
 
 import numpy as np
 import scipy as sp
 import pylab as plt
-from actogram import *
-from LightSchedule import *
-from singlepop_model import *
-from twopop_model import *
-from vdp_model import *
-from stroboscopic import *
+
+
+from HCRSimPY.plots import *
+from HCRSimPY.light_schedules import *
+from HCRSimPY.models import *
 
 
 
-def actogramRegularLight():
+
+def actogramRegularLight(save=False):
     """Show the effect of a regular light schedule on the circadian clock"""
 
     duration=16.0 #gets 8 hours of sleep
@@ -39,7 +42,8 @@ def actogramRegularLight():
 
     plt.title('Entrainment under Regular Light Conditions')
     plt.tight_layout()
-    plt.savefig('Regular_Light_actogram.eps')
+    if (save):
+        plt.savefig('Regular_Light_actogram.eps')
     plt.show()
 
 
@@ -85,7 +89,8 @@ def makeActogram(Light):
 
 
 def JetLagActogram(shift):
-    """Simulate the circadian rhythms of a slam shift in the light schedule. By default this will for a fully entrained subject and the shift will occur on the 11th day
+    """
+    Simulate the circadian rhythms of a slam shift in the light schedule. By default this will for a fully entrained subject and the shift will occur on the 11th day
     JetLagActogram(shift)
 
     """

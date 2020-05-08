@@ -1,7 +1,7 @@
 
 
 """
-This python module contains functions for creating light schedules giving the light levels in lux as a function of time in hours. 
+This python module contains functions for creating light schedules giving the light levels in lux as a function of time in hours.
 
 Used as input to simulate the circadian models.
 
@@ -18,7 +18,7 @@ from builtins import zip
 from builtins import map
 from builtins import range
 from builtins import object
-from past.utils import old_div
+#from past.utils import old_div
 import numpy as np
 import scipy as sp
 import pandas as pd
@@ -30,7 +30,7 @@ import datetime
 
 
 from numba import jit
-#from FourierSeries import FourierSeries
+
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -44,7 +44,7 @@ def cal_days_diff(a,b):
 @jit(nopython=True)
 def interpolateLinear(t, xvals, yvals):
     """Implement a faster method to get linear interprolations of the light functions"""
-    
+
     if (t>= xvals[-1]):
         return(0.0)
     if (t<=xvals[0]):
@@ -77,7 +77,7 @@ def LightLog(lightlevel, threshold=1.0):
         return(0.0)
     if (lightlevel>=threshold):
         return(np.log10(lightlevel))
-    
+
 
 
 
@@ -88,7 +88,7 @@ def RegularLight(t, Intensity, PP, period):
 
 
 def RegularLightSimple(t, Intensity=150.0, wakeUp=8.0, workday=16.0):
-    """Define a basic light schedule with a given intensity of the light, wakeup time and length of the active period (non-sleeping) 
+    """Define a basic light schedule with a given intensity of the light, wakeup time and length of the active period (non-sleeping)
     This schedule will automatically repeat on a daily basis, so each day will be the same.....
     """
 
@@ -96,7 +96,7 @@ def RegularLightSimple(t, Intensity=150.0, wakeUp=8.0, workday=16.0):
 
     if (s<0):
         s+=24.0
-    
+
     val=0.5*sp.tanh(100*(s)) - 0.5*sp.tanh(100*(s - workday))
     return(Intensity*val)
 
@@ -120,7 +120,7 @@ def SocialJetLag(t, weekdayWake=7.0, weekdayBed=24.0, weekendWake=11.0, weekendB
 
     t=fmod(t, (7)*24) #make it repeat each week
 
-    
+
     if (t<=24*5):
         #Monday through thursday
         duration=fmod(weekdayBed-weekdayWake, 24.0)
@@ -133,7 +133,7 @@ def SocialJetLag(t, weekdayWake=7.0, weekdayBed=24.0, weekendWake=11.0, weekendB
         if duration<0.0:
             duration+=24.0
         return(RegularLightSimple(t, Intensity=250.0, wakeUp=weekendWake, workday=duration))
-    
+
 
 def SlamShift(t, shift=8.0, intensity=150.0, beforeDays=10):
     """Simulate a sudden shift in the light schedule"""
@@ -147,7 +147,7 @@ def SlamShift(t, shift=8.0, intensity=150.0, beforeDays=10):
         if (newVal<0):
             newVal+=24.0
         return(RegularLightSimple(t, intensity, wakeUp=newVal, workday=16.0))
-        
+
 
 def OneDayShift(t, pulse=23.0, wakeUp=8.0, workday=16.0, shift=8.0):
 
@@ -227,9 +227,9 @@ class NoisyLightInput(object):
 
         #Background light
         self.background_ll=150.0 # the light level doesn't go less that this during active period
-        
+
         self.generateTS()
-        
+
 
 
     def generateTS(self):
@@ -244,7 +244,7 @@ class NoisyLightInput(object):
         PP=12.0 #photoperiod (hours where you can get outdoor sunlight, this is fixed)
         IntLast=0.0
         LightOnset=0.0 #This controls when the AP starts (defaults to dawn). Can't do wake up earlier than dawn as of yet
-        
+
         for t in self.time:
 
             day=t/24.0
@@ -257,15 +257,15 @@ class NoisyLightInput(object):
                     AP=12.0
 
                 #LightOnset=np.random.uniform(0.0,2.0)
-                
-            
-    
+
+
+
             val=0.5*sp.tanh(10*(fmod(t, period)-LightOnset)) - 0.5*sp.tanh(10*(fmod(t, period) - (AP+LightOnset))) #Sleep modulation of light input
             if (fmod(t, period)<=PP):
                 Int=self.background_ll+10**np.random.normal(0.0,self.nl_sd) #Random light Intensity, allowing for natural light exposures
             else:
                 Int=self.background_ll+np.random.normal(loc=0.0, scale=self.al_sd) #Random light intensity only indoor ranges
-                
+
             if (Int> 10000):
                 Int=10000.0
             if (Int < 0.0):
@@ -283,8 +283,8 @@ class NoisyLightInput(object):
 
         self.LightFunc=interpolate.interp1d(self.time, self.lightVals)
 
-        
-        
+
+
 
     def plotNoisyLight(self, numdays=10):
 
@@ -316,7 +316,7 @@ class NoisyLightInput(object):
         y=np.array(y)
         plt.plot(x,y+1.0)
         plt.show()
-        
+
 
 
 
@@ -324,7 +324,7 @@ class hchs_light(object):
 
     def __init__(self, filename, smoothWindow=20):
 
-        fileData=pd.read_csv(filename, delimiter=',', skiprows=0) 
+        fileData=pd.read_csv(filename, delimiter=',', skiprows=0)
         #fileData=fileData.set_index('Date_Time')
         fileData['Lux']=fileData.whitelight+fileData.bluelight+fileData.redlight+fileData.greenlight
         fileData.time = pd.to_datetime(fileData.time, format='%H:%M:%S')
@@ -342,10 +342,10 @@ class hchs_light(object):
                 day_list.append(count)
 
         self.data.day=day_list
-        
+
 
         #Create an index to count the hours of the data (UNITS of hours)
-        
+
         self.data['TimeTotal']=(self.data.day)*24.0+pd.DatetimeIndex(self.data.time).hour+pd.DatetimeIndex(self.data.time).minute/60.0+pd.DatetimeIndex(self.data.time).second/3600.0
         self.data['TimeCount']=pd.DatetimeIndex(self.data.time).hour+pd.DatetimeIndex(self.data.time).minute/60.0+pd.DatetimeIndex(self.data.time).second/3600.0
         self.data['Lux']=self.data.Lux.rolling(smoothWindow, center=True).max()
@@ -360,7 +360,7 @@ class hchs_light(object):
 
         #Make a function which gives the light level
         self.LightFunction=lambda t: interpolateLinear(fmod(t, self.endTime), np.array(self.data['TimeTotal']), np.array(self.data['Lux']))
-        
+
 
         #Make a extended function for lomg simulations
         xvals=np.array(self.data['TimeTotal'])
@@ -379,24 +379,24 @@ class hchs_light(object):
 
         self.LightFunctionInitial=lambda t: interpolateLinearExt(fmod(t, xvals[-1]),xvals,yvals)
         #Trim off the non-full days within the data set and make a light function using that data
-        
+
 
     def findMidSleep(self, cutoff=0.5, show=False):
         """Estimate the midpoint of the sleep. Actually the angular mean of the sleep times"""
-        
+
         av_data=self.data.groupby(by=['TimeCount']).mean()
 
         #Now round the sleep scores:
         av_data.loc[av_data['wake']>=cutoff, 'wake']=1.0
         av_data.loc[av_data['wake']<cutoff, 'wake']=0.0
-        
+
         sleepTimes=pd.Series(av_data.loc[av_data['wake']==0.0,:].index)
         toangle=lambda x: np.exp(complex(0,1)*(2*sp.pi*x/24.0))
         all_angles=np.angle(list(map(toangle, sleepTimes)))
         Z=np.mean(list(map(toangle, sleepTimes)))
         angle=np.fmod(np.angle(Z)+2.0*sp.pi, 2.0*sp.pi)
         amp=abs(Z)
-    
+
         timeEquivalent=old_div(angle*24.0,(2.0*sp.pi))
 
         if (show==True):
@@ -410,9 +410,9 @@ class hchs_light(object):
             plt.plot(av_data.index, list(map(LightLog, list(av_data.Lux))), color='blue')
             plt.show()
 
-    
+
         return(timeEquivalent)
-        
+
 
     def plot_light(self):
         """Make a plot of the light schedule with each day on top of the last"""
@@ -441,8 +441,8 @@ class JennyDataReader(object):
             Fullfilename="~/work/Research/gpu/Human/HumanData/DATA/"+filename
         else:
             Fullfilename=filename
-            
-        fileData=pd.read_csv(Fullfilename, delimiter=',', skiprows=3, parse_dates={'Date_Time': ['Date','Time'] }, date_parser=parse_dt) 
+
+        fileData=pd.read_csv(Fullfilename, delimiter=',', skiprows=3, parse_dates={'Date_Time': ['Date','Time'] }, date_parser=parse_dt)
         fileData=fileData.set_index('Date_Time')
         #Make the Sleep column categorical
         fileData['Sleep'] = fileData['Sleep or Awake?'].astype('category')
@@ -450,7 +450,7 @@ class JennyDataReader(object):
 
         self.data=fileData[['Lux', 'Sleep']]
 
-    
+
 
         #Add a numerical sleep score column
         sleep_score_dict={'S':1.0, 'W':0.0}
@@ -465,7 +465,7 @@ class JennyDataReader(object):
         self.data.loc[:, 'Lux']=self.data['Lux'].rolling(window=10, center=True).max() #Define the light level as a max over the last 5 minutes
         self.data=self.data.dropna()
 
-        
+
         days=np.array([cal_days_diff(d,pd.DatetimeIndex(self.data.index)[0]) for d in pd.DatetimeIndex(self.data.index)])
 
         self.data['TimeCount']=pd.DatetimeIndex(self.data.index).hour*60+pd.DatetimeIndex(self.data.index).minute
@@ -474,7 +474,7 @@ class JennyDataReader(object):
 
         #Find the light time in hours
         self.data['TimeTotal']=(days*24.0*60+pd.DatetimeIndex(self.data.index).hour*60+pd.DatetimeIndex(self.data.index).minute)/60.0
-        
+
 
         #Store time bounds for ease of use
         self.startTime=self.data.TimeTotal.iloc[0]
@@ -520,8 +520,8 @@ class JennyDataReader(object):
         #Extract the dates to be used in comparing with sleep data for included_days only
 
         self.data['Date_Only']=self.data.index.date
-        
-       
+
+
     def findFirstLight(self):
         """Find the first time light is recorded in the data set"""
 
@@ -537,7 +537,7 @@ class JennyDataReader(object):
             if self.data.iloc[-j,0]>threshold:
                 lastLight=self.data.shape[0]-j
                 break
-        
+
         self.data=self.data.iloc[firstLight:lastLight, :]
 
 
@@ -550,7 +550,7 @@ class JennyDataReader(object):
         plt.plot(x/24.0,list(map(LightLog,y)))
         plt.show()
 
-        
+
 
 
     def removeNaps(self):
@@ -558,10 +558,10 @@ class JennyDataReader(object):
 
         hours=pd.DatetimeIndex(self.data.index).hour
         selection_criteria=(hours<18.0) & (hours >11.0)
-        
-        
+
+
         self.data.loc[selection_criteria, 'Sleep_Score']=0.0
-        
+
 
 
     def estimateAvgSleepMidpoint(self, cutoff=0.50, show=False):
@@ -571,14 +571,14 @@ class JennyDataReader(object):
         #Now round the sleep scores:
         av_data.loc[av_data['Sleep_Score']>=cutoff, 'Sleep_Score']=1.0
         av_data.loc[av_data['Sleep_Score']<cutoff, 'Sleep_Score']=0.0
-        
+
         sleepTimes=pd.Series(av_data.loc[av_data['Sleep_Score']==1.0,:].index)
         toangle=lambda x: np.exp(complex(0,1)*(2*sp.pi*x/24.0))
         all_angles=np.angle(list(map(toangle, sleepTimes)))
         Z=np.mean(list(map(toangle, sleepTimes)))
         angle=np.fmod(np.angle(Z)+2.0*sp.pi, 2.0*sp.pi)
         amp=abs(Z)
-    
+
         timeEquivalent=old_div(angle*24.0,(2.0*sp.pi))
 
         if (show==True):
@@ -588,7 +588,7 @@ class JennyDataReader(object):
             plt.ylim(-1,1)
             plt.show()
 
-    
+
         return((timeEquivalent,amp))
 
 
@@ -640,12 +640,10 @@ class WrightLightData(object):
         plt.show()
 
 
-        
-        
+
+
 if __name__=='__main__':
 
     hc=hchs_light('../../HumanData/HCHS/hchs-sol-sueno-00579338.csv')
     hc.plot_light()
     print(hc.findMidSleep(show=True))
-    
-    

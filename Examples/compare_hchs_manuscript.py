@@ -1,6 +1,6 @@
 """
 File to generate comparisons between the models for data recorded as part of
-the HCHS publicly available data set. 
+the HCHS publicly available data set.
 
 https://sleepdata.org/datasets/hchs
 
@@ -10,13 +10,13 @@ from __future__ import print_function
 
 
 #Set the path to the downloaded HCHS data files on YOUR system!!
-from builtins import map
-from builtins import str
-from builtins import range
 hchs_data_location='../../HumanData/HCHS/hchs-sol-sueno-'
 
 
 
+from builtins import map
+from builtins import str
+from builtins import range
 from circular_stats import *
 import pandas as pd
 import scipy as sp
@@ -28,15 +28,14 @@ from circstats import *
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from statsmodels.stats.weightstats import ttest_ind
-from LightSchedule import *
 from scipy.interpolate import InterpolatedUnivariateSpline
 import matplotlib.gridspec as gridspec
-from latexify import *
 
-from LightSchedule import *
-from singlepop_model import *
-from vdp_model import *
-from twopop_model import *
+
+from HCRSimPY.light_schedules import *
+from HCRSimPy.plots import *
+from HCRSimPY.models import *
+
 
 convert_mil_time=lambda x: pd.DatetimeIndex(x).hour+pd.DatetimeIndex(x).minute/60.0+pd.DatetimeIndex(x).second/3600.0
 
@@ -76,7 +75,7 @@ def record_diff(tsdfS, tsdfV, tsdfT):
 
 
 
- 
+
 
 hchs2=pd.read_csv('hchs_model_diff.csv').rename(columns=lambda x: x.strip())
 column_list=['PID', 'SAWA9', 'SAWA339', 'SHIFTWORKERYN', 'SAWA174', 'SAWA313', 'SAWA315', 'SAWA316', 'SAWA323', 'RMEQ', 'SAWA325', 'SAWA326', 'SAWA327', 'SAWA328', 'SAWA317']
@@ -157,7 +156,7 @@ for f in list_of_discrepancies:
         if len(f)!=8:
             while (len(f)<8):
                 f='0'+f
-    
+
         filename=hchs_data_location+f+'.csv'
         ls=hchs_light(filename)
         av_data=ls.data.groupby(by=['TimeCount']).mean()
@@ -167,16 +166,16 @@ for f in list_of_discrepancies:
             data_list.append((str(f), 'Disagree', x[i], LightLog(y_vals[i])))
     except:
         print(("Error with file: ", f))
-        
+
 
 for f in list_of_agreements:
     try:
         f=str(f)
-        
+
         if len(f)!=8:
             while (len(f)<8):
                 f='0'+f
-    
+
         filename=hchs_data_location+f+'.csv'
         ls=hchs_light(filename)
         av_data=ls.data.groupby(by=['TimeCount']).mean()
@@ -186,12 +185,12 @@ for f in list_of_agreements:
             data_list.append((str(f), 'Agree', x[i], LightLog(y_vals[i])))
     except:
         print(("Error with file (agreement): ", f))
-        
 
 
-lightSchedulesD=pd.DataFrame(data_list, columns=['PID', 'Agreement', 'Time', 'Log_Lux'])        
-        
-latexify(columns=1)        
+
+lightSchedulesD=pd.DataFrame(data_list, columns=['PID', 'Agreement', 'Time', 'Log_Lux'])
+
+latexify(columns=1)
 plt.figure()
 G = gridspec.GridSpec(1, 2)
 ax2= plt.subplot(G[0, 0])
@@ -241,7 +240,7 @@ trans_days=50
 init=guessICData(lfa, 0.0, length=trans_days)
 initVDP=guessICDataVDP(lfa, 0.0, length=trans_days)
 initTwo=guessICDataTwoPop(lfa, 0.0, length=trans_days)
-     
+
 a=SinglePopModel(lfa)
 b=vdp_model(lfa)
 c=TwoPopModel(lfa)
@@ -264,7 +263,7 @@ trans_days=50
 init=guessICData(lfd, 0.0, length=trans_days)
 initVDP=guessICDataVDP(lfd, 0.0, length=trans_days)
 initTwo=guessICDataTwoPop(lfd, 0.0, length=trans_days)
-     
+
 a=SinglePopModel(lfd)
 b=vdp_model(lfd)
 c=TwoPopModel(lfd)
@@ -276,4 +275,3 @@ tsdf_vdp=b.getTS()
 tsdf_two=c.getTS()
 
 print(("Average DLMO diff for Disagree: ", np.array(record_diff(tsdf, tsdf_vdp, tsdf_two))))
-    

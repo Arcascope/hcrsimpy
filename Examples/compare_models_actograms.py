@@ -13,13 +13,13 @@ from math import *
 import sys
 import pandas as pd
 from scipy import interpolate
-from actogram import *
-from circular_stats import *
-from LightSchedule import *
-from singlepop_model import *
-from vdp_model import *
-from twopop_model import *
-from stroboscopic import *
+
+
+from HCRSimPY.plots import *
+from HCRSimPY.light_schedules import *
+from HCRSimPY.models import *
+from HCRSimPY.utils import circular_stats
+
 
 
 
@@ -36,9 +36,9 @@ def findKeyTimes(tsdf):
 
 
 
-    
 
-    
+
+
 
 
 def regularRoutineStats():
@@ -61,8 +61,8 @@ def regularRoutineStats():
         tsdf=a.getTS()
         CBT, DLMO=findKeyTimes(tsdf)
         resultsSP.append((i, DLMO, CBT))
-        
-        #Add vdp 
+
+        #Add vdp
         v=vdp_model(LightFunReg)
         init=v.integrateTransients()
         ent_angle=v.integrateModel(24*40, initial=init);
@@ -77,7 +77,7 @@ def regularRoutineStats():
         tsdf3=t.getTS()
         CBT, DLMO=findKeyTimes(tsdf3)
         resultsTP.append((i, DLMO, CBT))
-        
+
     resultsSP=np.array(resultsSP)
     resultsVDP=np.array(resultsVDP)
     resultsTP=np.array(resultsTP)
@@ -110,7 +110,7 @@ def compareRegularLight(Intensity=150.0):
     duration=16.0 #gets 8 hours of sleep
     wake=6.0
     LightFunReg=lambda t: RegularLightSimple(t,Intensity,wake,duration)
-    
+
     #Create SP Model
     a=SinglePopModel(LightFunReg)
     init=a.integrateTransients()
@@ -120,7 +120,7 @@ def compareRegularLight(Intensity=150.0):
     ax=plt.gca()
     acto=actogram(ax, tsdf) #add an actogram to those axes
 
-    #Add vdp 
+    #Add vdp
     v=vdp_model(LightFunReg)
     init=v.integrateTransients()
     ent_angle=v.integrateModel(24*40, initial=init);
@@ -150,7 +150,7 @@ def compareShiftWork(dayson=5, daysoff=2):
     ax=plt.gca()
     acto=actogram(ax, tsdf) #add an actogram to those axes
 
-    #Add vdp 
+    #Add vdp
     v=vdp_model(LightFun)
     init=v.integrateTransients()
     ent_angle=v.integrateModel(24*40, initial=init);
@@ -181,7 +181,7 @@ def compareActogram(Light):
     ax=plt.gca()
     acto=actogram(ax, tsdf) #add an actogram to those axes
 
-    #Add vdp 
+    #Add vdp
 
     v=vdp_model(Light)
     init=v.integrateTransients()
@@ -201,11 +201,11 @@ def JetLagActogram(shift):
         print(("Simulating eastbound travel by ", abs(shift), " time zones"))
 
 
-        
+
     LightFunReg=lambda t: RegularLightSimple(t,150.0, 8.0,16.0)
     JetLag=lambda t: SlamShift(t, shift)
 
-    
+
     #Create SP Model
     a=SinglePopModel(LightFunReg)
     init=a.integrateTransients()
@@ -216,8 +216,8 @@ def JetLagActogram(shift):
     ax=plt.gca()
     acto=actogram(ax, tsdf) #add an actogram to those axes
 
-    
-    #Add vdp 
+
+    #Add vdp
     v=vdp_model(LightFunReg)
     init=v.integrateTransients()
     v.Light=JetLag
@@ -238,7 +238,7 @@ def JetLagActogram(shift):
     strobo=stroboscopic(ax, tsdf[tsdf['Time']>=10*24.0])
     strobo.addStroboPlot(tsdf2[tsdf2['Time']>=10*24.0], col='darkgreen')
     strobo.addStroboPlot(tsdf3[tsdf2['Time']>=10*24.0], col='red')
-    
+
     plt.show()
 
 
@@ -248,6 +248,3 @@ if __name__=='__main__':
     JetLagActogram(-10.0)
     #compareRegularLight()
     #compareShiftWork(15,10)
-    
-
-

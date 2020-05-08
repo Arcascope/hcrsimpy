@@ -1,3 +1,14 @@
+
+
+
+
+
+
+
+
+
+
+
 from builtins import map
 from builtins import object
 import numpy as np
@@ -8,7 +19,12 @@ from math import *
 import sys
 import pandas as pd
 from scipy import interpolate
-from LightSchedule import *
+
+
+from HCRSimPY.plots import *
+from HCRSimPY.light_schedules import *
+
+
 
 
 class TwoPopModel(object):
@@ -40,8 +56,8 @@ class TwoPopModel(object):
         self.delta=0.0075
         self.p=1.5
         self.I0=9325.0
-        
-        
+
+
 
 
     def alpha0(self,t):
@@ -63,7 +79,7 @@ class TwoPopModel(object):
         LightPhase=self.sigma*Bhat-self.A1*Bhat*0.5*(pow(Rv,3.0)+1.0/Rv)*sp.sin(Psiv+self.BetaL)-self.A2*Bhat*0.5*(1.0+pow(Rv,8.0))*sp.sin(2.0*Psiv+self.BetaL2);
 
         dydt=np.zeros(5)
-       
+
         dydt[0]=-self.gamma*Rv+self.Kvv/2.0*Rv*(1-pow(Rv,4.0))+self.Kdv/2.0*Rd*(1-pow(Rv,4.0))*cos(Psid-Psiv)+LightAmp;
         dydt[1]=-self.gamma*Rd+self.Kdd/2.0*Rd*(1-pow(Rd,4.0))+self.Kvd/2.0*Rv*(1.0-pow(Rd,4.0))*cos(Psid-Psiv);
         dydt[2]=2.0*sp.pi/self.tauV+self.Kdv/2.0*Rd*(pow(Rv,3.0)+1.0/Rv)*sp.sin(Psid-Psiv)+LightPhase;
@@ -79,14 +95,14 @@ class TwoPopModel(object):
         initial[2]=fmod(initial[2], 2*sp.pi) #start the initial phase between 0 and 2pi
         initial[3]=fmod(initial[3], 2*sp.pi) #start the initial phase between 0 and 2pi
 
-        r=sp.integrate.solve_ivp(self.derv,(0,tend), initial, t_eval=self.ts, method='Radau') 
+        r=sp.integrate.solve_ivp(self.derv,(0,tend), initial, t_eval=self.ts, method='Radau')
         self.results=np.transpose(r.y)
-        
+
         ent_angle=fmod(self.results[-1,2], 2*sp.pi)*24.0/(2.0*sp.pi) #angle at the lights on period
         return(ent_angle)
 
     def integrateModelData(self, timespan, initial):
-        """ Integrate the model using a light function defined by data 
+        """ Integrate the model using a light function defined by data
         integrateModelData(self, timespan, initial)
         """
         dt=0.01
@@ -94,7 +110,7 @@ class TwoPopModel(object):
         initial[2]=fmod(initial[2], 2*sp.pi) #start the initial phase between 0 and 2pi
         initial[3]=fmod(initial[3], 2*sp.pi) #start the initial phase between 0 and 2pi
         r=sp.integrate.solve_ivp(self.derv,(timespan[0],timespan[-1]), initial, t_eval=self.ts, method='Radau')
-        
+
         self.results=np.transpose(r.y)
 
 
@@ -115,17 +131,17 @@ class TwoPopModel(object):
         Rd=self.results[:,1]
         ts=pd.DataFrame({'Time': self.ts, 'Light_Level':light_ts, 'Phase': self.results[:,2], 'R': self.results[:,0], 'n': self.results[:,4], 'theta':self.results[:,2]-self.results[:,3]})
         return(ts)
-       
+
 
 def guessICDataTwoPop(LightFunc, time_zero, length=150):
     """Guess the Initial conditions for the model using the persons light schedule
     Need to add a check to see if the system is entrained at all
     """
-    
+
     a=TwoPopModel(LightFunc)
     #make a rough guess as to the initial phase
     init=[0.7, 0.7, fmod(time_zero/24.0*2*sp.pi+sp.pi, 2*sp.pi), fmod(time_zero/24.0*2*sp.pi+sp.pi, 2*sp.pi), 0.01]
-    
+
     a.integrateModel(int(length)*24.0, initial=init)
     init=a.results[-1,:]
     a.integrateModel(48.0, initial=init)
@@ -144,11 +160,10 @@ def guessICDataTwoPop(LightFunc, time_zero, length=150):
 
 
 
-        
-        
+
+
 
 
 
 if __name__=='__main__':
     pass
-   

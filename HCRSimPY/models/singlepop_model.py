@@ -23,9 +23,10 @@ import sys
 import pandas as pd
 from scipy import interpolate
 import seaborn as sbn
-from actogram import *
-from circular_stats import *
-from LightSchedule import *
+
+from HCRSimPY.plots import *
+from HCRSimPY.light_schedules import *
+from HCRSimPY.utils import circular_stats
 
 
 #Make a class to store methods related to simulating the circadian model
@@ -45,12 +46,12 @@ class SinglePopModel(object):
         """Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file"""
 
         try:
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("optimalParams.dat", 'r').readlines()[0].split()))        
+            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("optimalParams.dat", 'r').readlines()[0].split()))
         except:
             #print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
             self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
 
-        
+
     def updateParameters(self, paramDict):
         """Update the model parameters using a passed in parameter dictionary. Any parameters not included
         in the dictionary will be set to the default values"""
@@ -60,7 +61,7 @@ class SinglePopModel(object):
         if 'tau' in paramDict.keys():
             paramDict['w0']=2*sp.pi/paramDict['tau']
 
-        
+
         #Now set the parameters
         for k in paramDict.keys():
             mycode='self.'+k+"=paramDict[\'"+k+"\']"
@@ -71,10 +72,10 @@ class SinglePopModel(object):
         """Get a dictionary of the current parameters being used by the model object"""
 
         current_params={ 'w0':self.w0, 'K':self.K,'gamma':self.gamma, 'Beta1':self.Beta1, 'A1':self.A1, 'A2':self.A2, 'BetaL1':self.BetaL1, 'BetaL2':self.BetaL2, 'sigma':self.sigma, 'G':self.G, 'alpha_0':self.alpha_0, 'delta':self.delta, 'p':self.p, 'I0':self.I0}
-        
+
         return(current_params)
-            
-            
+
+
 
 
     def updatePeriod(self, newVal):
@@ -83,7 +84,7 @@ class SinglePopModel(object):
             self.w0=2*sp.pi/newVal
         else:
             print("The new circadian period should be in hours, it looks like you forgot this so the period was not updated")
-        
+
 
     def alpha0(self,t):
         """A helper function for modeling the light input"""
@@ -116,21 +117,21 @@ class SinglePopModel(object):
         self.ts=np.arange(0.0,tend,dt)
         initial[1]=fmod(initial[1], 2*sp.pi) #start the initial phase between 0 and 2pi
 
-        r=sp.integrate.solve_ivp(self.derv,(0,tend), initial, t_eval=self.ts, method='Radau') 
+        r=sp.integrate.solve_ivp(self.derv,(0,tend), initial, t_eval=self.ts, method='Radau')
         self.results=np.transpose(r.y)
-        
+
         ent_angle=fmod(self.results[-1,1], 2*sp.pi)*24.0/(2.0*sp.pi) #angle at the lights on period
         return(ent_angle)
 
     def integrateModelData(self, timespan, initial):
-        """ Integrate the model using a light function defined by data 
+        """ Integrate the model using a light function defined by data
         integrateModelData(self, timespan, initial)
         """
         dt=0.1
         self.ts=np.arange(timespan[0], timespan[1], dt)
         initial[1]=fmod(initial[1], 2*sp.pi) #start the initial phase between 0 and 2pi
         r=sp.integrate.solve_ivp(self.derv,(timespan[0],timespan[1]), initial, t_eval=self.ts, method='Radau')
-        
+
         self.results=np.transpose(r.y)
 
     def integrateTransients(self, numdays=50):
@@ -145,7 +146,7 @@ class SinglePopModel(object):
     def findKeyTimes(self):
         """Find the mean circadian phases at different times in the data set as well as the variation"""
         wrapped_time=np.round([fmod(x, 24.0) for x in self.ts],2)
-        df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})            
+        df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})
 
         #Find the circular statistics for the circadian phase data at each time point
         df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
@@ -158,8 +159,8 @@ class SinglePopModel(object):
         """Find the average circadian phase for each clock time in the simulation. Returns a pandas data frame with index given by the wrapped time, the mean phase across the simulation, phase coherence and number of samples"""
 
         wrapped_time=np.round([fmod(x, 24.0) for x in self.ts],2)
-        df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})            
-        
+        df=pd.DataFrame({'Time': wrapped_time, 'Phase': self.results[:,1]})
+
         df2=df.groupby('Time')['Phase'].agg({'Circular_Mean':circular_mean, 'Phase_Coherence': phase_coherence, 'Samples':np.size})
 
         return(df2)
@@ -181,13 +182,13 @@ class SinglePopModel(object):
                     melatonin.append(1.0)
                 else:
                     melatonin.append(0.0)
-                    
-                    
+
+
             ts['Melatonin']=np.array(melatonin)
 
-        
 
-        
+
+
         return(ts)
 
 
@@ -201,11 +202,11 @@ def guessICData(LightFunc, time_zero, length=150, show=False):
 
     guessICData(LightFunc, time_zero, length=150, show=False)
     """
-    
+
     a=SinglePopModel(LightFunc)
     #make a rough guess as to the initial phase
     init=[0.7, fmod(time_zero/24.0*2*sp.pi+sp.pi, 2*sp.pi), 0.1]
-    
+
     a.integrateModel(int(length)*24.0, initial=init)
     init=a.results[-1,:]
     a.integrateModel(48.0, initial=init)
@@ -221,10 +222,3 @@ def guessICData(LightFunc, time_zero, length=150, show=False):
     if (show):
         print(("Time zero, initial ", time_zero, initial))
     return(initial)
-    
-
-
-
-
-    
-    

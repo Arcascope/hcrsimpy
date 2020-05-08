@@ -87,7 +87,6 @@
 
 #Other
 *.swp
-*.dat
 *.nav
 *.snm
 *.toc
@@ -116,3 +115,6 @@ Thumbs.db
 Jupyter_Notebooks/*
 Figures/*
 ShiftWorkerPlots/*
+dist/*
+build/*
+hcrsim/*
