@@ -72,11 +72,7 @@ class SinglePopModel(object):
         No return value
 
         """
-        try:
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0, cost=list(map(float, open("../data/optimalParams.dat", 'r').readlines()[0].split()))
-        except:
-            print("Cannot find the optimalParam.dat file, using hard coded parameters for the SP model")
-            self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
+        self.w0, self.K, self.gamma, self.Beta1, self.A1, self.A2, self.BetaL1, self.BetaL2, self.sigma, self.G, self.alpha_0, self.delta, self.p, self.I0=[0.263524, 0.06358, 0.024, -0.09318, 0.3855, 0.1977, -0.0026, -0.957756, 0.0400692, 33.75, 0.05, 0.0075, 1.5, 9325.0]
 
 
     def updateParameters(self, paramDict):
@@ -132,6 +128,7 @@ class SinglePopModel(object):
 
     def alpha0(self,t):
         """A helper function for modeling the light input processing"""
+        assert self.Light(t) >= 0.0
         return(self.alpha_0*pow(self.Light(t), self.p)/(pow(self.Light(t), self.p)+self.I0));
 
 
@@ -186,6 +183,9 @@ class SinglePopModel(object):
 
         ent_angle=fmod(self.results[-1,1], 2*sp.pi)*24.0/(2.0*sp.pi) #angle at the lights on period
         return(ent_angle)
+
+
+
 
     def integrateModelData(self, timespan, initial, dt=0.1):
         """

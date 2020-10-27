@@ -7,8 +7,6 @@ Used as input to simulate the circadian models.
 
 Contains some common schedules as well as some custom data driven schedules
 
-
-
 """
 from __future__ import division
 from __future__ import print_function
@@ -377,7 +375,7 @@ class hchs_light(object):
         #start at zero
         xvals=xvals-24.0
 
-        self.LightFunctionInitial=lambda t: interpolateLinearExt(fmod(t, xvals[-1]),xvals,yvals)
+        self.LightFunctionInitial=lambda t: np.absolute(interpolateLinearExt(fmod(t, xvals[-1]),xvals,yvals))
         #Trim off the non-full days within the data set and make a light function using that data
 
 
