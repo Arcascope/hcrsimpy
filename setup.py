@@ -6,7 +6,7 @@ with open("README.md", "r") as readme_file:
 requirements=["scipy>=1.3"]
 setup(
     name="HCRSimPY",
-    version="1.0.0",
+    version="1.0.2",
     author="Kevin Hannay",
     author_email="khannay24@gmail.com",
     description="A package to simulate and analyze human circadian rhythms.",
