@@ -1,7 +1,8 @@
 #Example run for forger 99 vdp model
 
 import pylab as plt
-
+import sys 
+sys.path.append("..")
 
 from HCRSimPY.plots import *
 from HCRSimPY.light_schedules import *
@@ -19,9 +20,11 @@ a.integrateModel(24*40)
 tsdf=a.getTS()
 
 
+
 plt.figure()
 ax=plt.gca()
 acto=actogram(ax, tsdf) #add an actogram to those axes
+
 
 plt.title('Forger 1999 VDP Entrainment under Regular Light Conditions')
 plt.tight_layout()

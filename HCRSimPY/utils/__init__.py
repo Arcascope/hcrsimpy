@@ -3,3 +3,6 @@
 
 from .circstats import *
 from .circular_stats import *
+from ..plots import *
+from ..models import * 
+from ..light_schedules import *

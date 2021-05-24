@@ -21,8 +21,6 @@ from scipy.integrate import *
 import pylab as plt
 from math import *
 import sys
-import pandas as pd
-from scipy import interpolate
 
 
 class actogram(object):

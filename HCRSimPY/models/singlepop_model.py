@@ -33,14 +33,12 @@ import scipy as sp
 from scipy.integrate import *
 import pylab as plt
 from math import *
-import sys
 import pandas as pd
-from scipy import interpolate
-import seaborn as sbn
 
-from HCRSimPY.plots import *
-from HCRSimPY.light_schedules import *
-from HCRSimPY.utils import circular_stats
+
+#from plots import *
+#from HCRSimPY.light_schedules import *
+
 
 
 #Make a class to store methods related to simulating the circadian model

@@ -3,3 +3,6 @@
 
 from .actogram import *
 from .stroboscopic import *
+from ..models import *
+from ..utils import * 
+from ..light_schedules import *

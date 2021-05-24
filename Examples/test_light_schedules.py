@@ -15,6 +15,10 @@ import numpy as np
 import scipy as sp
 import pylab as plt
 
+import sys 
+sys.path.append("..")
+
+
 
 from HCRSimPY.plots import *
 from HCRSimPY.light_schedules import *
