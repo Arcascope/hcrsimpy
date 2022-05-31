@@ -127,3 +127,21 @@ Virtual environment for dev
 * pip install -e .
 * pip freeze > requirements.txt
 * deactivate
+
+# Further Documentation
+Dated May/June 2022
+
+* Mostly syntax errors; few runtime or logic errors
+* Some problems with modules/libraries like numpy and matplotlib
+* Trouble with variable naming
+* Comments and previous documentation errors
+* Majority of output seems correct given the context and purpose of the program
+* PEP-8 compliancy
+* Common packages:
+* numpy
+* scipy
+* matplotlib
+* sys
+* pandas
+* pylab
+* __future__
