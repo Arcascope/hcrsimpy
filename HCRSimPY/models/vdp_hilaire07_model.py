@@ -200,7 +200,7 @@ class vdp_hilaire2007_model(object):
 
     def guessICDataVDP(LightFunc, time_zero, length=50):
         """Guess the Initial conditions for the model using the persons light schedule"""
-
+# issue with vdp_model
         a = vdp_model(LightFunc)
         # make a rough guess as to the initial phase
         init = np.array([1.0, 1.0, 0.0])
