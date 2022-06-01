@@ -3,9 +3,18 @@
 
 """
 
+# NEW 
+# importing dependencies 
+# Note: Confusion with vdp_model()
 
+import numpy as np
+import pandas as pd
+import scipy as sp
+import math
 
-
+from scipy.integrate import *
+from HCRSimPY.plots import *
+from HCRSimPY.light_schedules import *
 
 
 class vdp_hilaire2007_model(object):
@@ -25,6 +34,7 @@ class vdp_hilaire2007_model(object):
 
     def setParameters(self):
         """
+        
         Specify the default model parameters
 
         setParameters()
@@ -196,7 +206,7 @@ class vdp_hilaire2007_model(object):
 
         ts = pd.DataFrame(
             {'Time': self.ts, 'Light_Level': light_ts, 'Phase': Phase, 'R': Amplitude, 'n': self.results[:, 2]})
-        return (ts)
+        return ts
 
     def guessICDataVDP(LightFunc, time_zero, length=50):
         """Guess the Initial conditions for the model using the persons light schedule"""
@@ -210,13 +220,13 @@ class vdp_hilaire2007_model(object):
         a.integrateModel(48.0, initial=init)
 
         limit_cycle = a.results
-        timeDay = lambda x: fmod(x, 48.0)
+        timeDay = lambda x: math.fmod(x, 48.0)
         lc_ts = np.array(list(map(timeDay, a.ts)))
 
         idx = np.searchsorted(lc_ts, time_zero) - 1
         initial = limit_cycle[idx, :]
         # print time_zero, initial
-        return (initial)
+        return initial
 
 
 
