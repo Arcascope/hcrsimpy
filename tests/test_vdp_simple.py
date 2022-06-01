@@ -25,6 +25,8 @@ class TestModel(unittest.TestCase):
 
     def test_model_update_invalid_values(self):
         model = vdp_forger99_model(lambda t:0.0)
+        # Invalid_Values not defined; error with assertRaises()
+        # arguments
         self.assertRaises(Invalid_Values,model.updateParameters,{"taux":"abc"})
 
 
