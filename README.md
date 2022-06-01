@@ -11,6 +11,20 @@ https://journals.sagepub.com/eprint/CZRXAPFRWA94ZMFDZWWW/full
 
 Enjoy!
 
+Common dependencies/Libraries:
+* numpy
+* math
+* matplotlib
+* scipy
+* pandas
+* statsmodels
+* pylab
+* numba
+
+
+Note: The code here uses the most recent and updated versions of these libraries.
+
+
 ## Installing the Package
 
 This repo is now available as a pip3 package. It may be installed by giving the command:
@@ -134,4 +148,14 @@ Dated May/June 2022
 * Updated package requirement specifications
 * More comments and documentation of software available for light schedule
 * Added PEP-8 compliance
-* Restructured code and naming of variables
+* Variable renaming for clarification
+* Less code ambiguity
+* Restructured code in general
+
+* Imported new packages
+* Resolved issues and errors with vdp_hilaire07_model.py
+* Updated vdp_hilaire07_model.py
+* Resolved issues and errors with test_vdp_simple.py
+* Updated test_vdp_simple.py
+
+
