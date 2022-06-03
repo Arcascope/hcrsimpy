@@ -157,5 +157,5 @@ Dated May/June 2022
 * Updated vdp_hilaire07_model.py
 * Resolved issues and errors with test_vdp_simple.py
 * Updated test_vdp_simple.py
-
+* Overall code readability enhanced
 
