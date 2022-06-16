@@ -3,17 +3,10 @@
 
 """
 
-# NEW 
-# importing dependencies 
-# Note: Confusion with vdp_model()
+# NEW
+# added libraries
+import Math
 
-import numpy as np
-import pandas as pd
-import scipy as sp
-import math
-
-from scipy.integrate import *
-from HCRSimPY.plots import *
 from HCRSimPY.light_schedules import *
 
 
@@ -34,7 +27,6 @@ class vdp_hilaire2007_model(object):
 
     def setParameters(self):
         """
-        
         Specify the default model parameters
 
         setParameters()
@@ -77,14 +69,22 @@ class vdp_hilaire2007_model(object):
         returns a dict of parameters
         """
 
-        current_params = {'taux': self.taux, 'mu': self.mu, 'G': self.G, 'alpha_0': self.alpha_0,
-                          'delta': self.delta, 'p': self.p, 'I0': self.I0, 'kparam': self.kparam}
+        current_params = {
+            'taux': self.taux,
+            'mu': self.mu,
+            'G': self.G,
+            'alpha_0': self.alpha_0,
+            'delta': self.delta,
+            'p': self.p,
+            'I0': self.I0,
+            'kparam': self.kparam
+        }
 
         return (current_params)
 
     def alpha0(self, t):
         """A helper function for modeling the light input processing"""
-        return (self.alpha_0 * pow((self.Light(t) / self.I0), self.p));
+        return (self.alpha_0 * pow((self.Light(t) / self.I0), self.p))
 
     def derv(self, t, y):
         """
@@ -96,18 +96,20 @@ class vdp_hilaire2007_model(object):
         returns dydt numpy array.
 
         """
-        x = y[0];
-        xc = y[1];
-        n = y[2];
+        x = y[0]
+        xc = y[1]
+        n = y[2]
 
-        Bhat = self.G * (1.0 - n) * self.alpha0(t) * (1 - 0.4 * x) * (1 - 0.4 * xc);
+        Bhat = self.G * (1.0 - n) * self.alpha0(t) * (1 - 0.4 * x) * (1 -
+                                                                      0.4 * xc)
 
         dydt = np.zeros(3)
 
-        dydt[0] = sp.pi / 12.0 * (xc + Bhat);
-        dydt[1] = sp.pi / 12.0 * (self.mu * (xc - 4.0 / 3.0 * pow(xc, 3.0)) - x * (
-                    pow(24.0 / (0.99669 * self.taux), 2.0) + self.kparam * Bhat));
-        dydt[2] = 60.0 * (self.alpha0(t) * (1.0 - n) - self.delta * n);
+        dydt[0] = np.pi / 12.0 * (xc + Bhat)
+        dydt[1] = np.pi / 12.0 * (
+            self.mu * (xc - 4.0 / 3.0 * pow(xc, 3.0)) - x *
+            (pow(24.0 / (0.99669 * self.taux), 2.0) + self.kparam * Bhat))
+        dydt[2] = 60.0 * (self.alpha0(t) * (1.0 - n) - self.delta * n)
 
         return (dydt)
 
@@ -129,15 +131,19 @@ class vdp_hilaire2007_model(object):
         dt = 0.1
         self.ts = np.arange(0.0, tend + dt, dt)
 
-        r = sp.integrate.solve_ivp(self.derv, (0, tend), initial, t_eval=self.ts, method='Radau')  # uses RK45
+        r = np.integrate.solve_ivp(self.derv, (0, tend),
+                                   initial,
+                                   t_eval=self.ts,
+                                   method='Radau')  # uses RK45
         self.results = np.transpose(r.y)
 
-        ent_angle = 1.0 * atan2(self.results[-1, 1], self.results[
-            -1, 0]);  # times negative one because VDP runs clockwise versus counterclockwise
+        # atan2 issue
+        ent_angle = 1.0 * Math.atan2(self.results[-1, 1], self.results[-1, 0])
+        # times negative one because VDP runs clockwise versus counterclockwise
         if (ent_angle < 0.0):
-            ent_angle += 2 * sp.pi;
+            ent_angle += 2 * np.pi
 
-        ent_angle = ent_angle * 24.0 / (2.0 * sp.pi);
+        ent_angle = ent_angle * 24.0 / (2.0 * np.pi)
         return (ent_angle)
 
     def integrateModelData(self, timespan, initial):
@@ -155,7 +161,10 @@ class vdp_hilaire2007_model(object):
         """
         dt = 0.01
         self.ts = np.arange(timespan[0], timespan[1], dt)
-        r = sp.integrate.solve_ivp(self.derv, (timespan[0], timespan[-1]), initial, t_eval=self.ts, method='Radau')
+        r = np.integrate.solve_ivp(self.derv, (timespan[0], timespan[-1]),
+                                   initial,
+                                   t_eval=self.ts,
+                                   method='Radau')
         self.results = np.transpose(r.y)
 
     def integrateTransients(self, numdays=500):
@@ -169,7 +178,9 @@ class vdp_hilaire2007_model(object):
         """
         tend = numdays * 24.0
 
-        r = sp.integrate.solve_ivp(self.derv, (0, tend), [0.7, 0.0, 0.0], t_eval=[tend], method='Radau')
+        r = np.integrate.solve_ivp(self.derv, (0, tend), [0.7, 0.0, 0.0],
+                                   t_eval=[tend],
+                                   method='Radau')
         results_trans = np.transpose(r.y)
 
         return (results_trans[-1, :])
@@ -187,30 +198,41 @@ class vdp_hilaire2007_model(object):
         plane coordinates. This is transformed so that it is comparible with the
         Hannay models.
 
-        returns a pandas data frame with the Time, Light_Level in lux, Phase (radians), R (amplitude), n (light activation variable) as columns
+        returns a pandas data frame with the Time, Light_Level in lux, Phase (radians), R (amplitude),
+        n (light activation variable) as columns
         """
 
         light_ts = list(map(self.Light, self.ts))
-        Amplitude = np.sqrt(self.results[:, 0] ** 2 + self.results[:,
-                                                      1] ** 2)  # define the amplitude as the sqrt of each coordinate squared
+        Amplitude = np.sqrt(
+            self.results[:, 0] ** 2 + self.results[:, 1] **
+            2)  # define the amplitude as the sqrt of each coordinate squared
 
         # Need to extract a phase in radians
-        wrappedPhase = -1.0 * np.arctan2(self.results[:, 1], self.results[:, 0])
+        wrappedPhase = -1.0 * np.arctan2(self.results[:, 1], self.results[:,
+                                                                          0])
 
         # Make it between 0 and 2pi
         for i in range(len(wrappedPhase)):
             if wrappedPhase[i] < 0.0:
-                wrappedPhase[i] += 2 * sp.pi
+                wrappedPhase[i] += 2 * np.pi
 
         Phase = np.unwrap(wrappedPhase, discont=0.0)
 
-        ts = pd.DataFrame(
-            {'Time': self.ts, 'Light_Level': light_ts, 'Phase': Phase, 'R': Amplitude, 'n': self.results[:, 2]})
-        return ts
+        # pandas as pd
+
+        ts = pd.DataFrame({
+            'Time': self.ts,
+            'Light_Level': light_ts,
+            'Phase': Phase,
+            'R': Amplitude,
+            'n': self.results[:, 2]
+        })
+        return (ts)
 
     def guessICDataVDP(LightFunc, time_zero, length=50):
         """Guess the Initial conditions for the model using the persons light schedule"""
-# issue with vdp_model
+
+        # vdp_model?
         a = vdp_model(LightFunc)
         # make a rough guess as to the initial phase
         init = np.array([1.0, 1.0, 0.0])
@@ -218,15 +240,14 @@ class vdp_hilaire2007_model(object):
         a.integrateModel(int(length) * 24.0, initial=init)
         init = a.results[-1, :]
         a.integrateModel(48.0, initial=init)
-
+        # fmod issue
         limit_cycle = a.results
-        timeDay = lambda x: math.fmod(x, 48.0)
+        def timeDay(x): return fmod(x, 48.0)
         lc_ts = np.array(list(map(timeDay, a.ts)))
 
         idx = np.searchsorted(lc_ts, time_zero) - 1
         initial = limit_cycle[idx, :]
         # print time_zero, initial
-        return initial
-
+        return (initial)
 
 
