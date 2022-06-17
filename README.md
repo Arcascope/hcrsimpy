@@ -9,6 +9,20 @@ The background for these models can be found in our article published in the Jou
 
 https://journals.sagepub.com/eprint/CZRXAPFRWA94ZMFDZWWW/full
 
+Some things to note are the differential equations since the code relies heavily on them. In particular, equations such as the Kronauer-Jewett Model are important and you will find this particular equation featured within the code of the twopop_model.py file. Frequently applied equations include:
+
+* Kronauer-Jewett Light Process
+
+* VDP Model
+
+* Clock Neuron Model
+
+* Cauchy (Lorentzian) Distribution
+
+* Least-squares cost function
+
+
+
 Enjoy!
 
 Common dependencies/Libraries:
@@ -158,4 +172,7 @@ Dated May/June 2022
 * Resolved issues and errors with test_vdp_simple.py
 * Updated test_vdp_simple.py
 * Overall code readability enhanced
+
+* Various implementations of differential equations/mathematical models inspected and corrected
+* Ex from prev.: Kronauer-Jewett Light Process, Clock Neuron Model, etc... 
 
