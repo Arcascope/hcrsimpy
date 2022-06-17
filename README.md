@@ -172,6 +172,7 @@ Dated May/June 2022
 * Resolved issues and errors with test_vdp_simple.py
 * Updated test_vdp_simple.py
 * Overall code readability enhanced
+* Minor syntax errors resolved overall
 
 * Various implementations of differential equations/mathematical models inspected and corrected
 * Ex from prev.: Kronauer-Jewett Light Process, Clock Neuron Model, etc... 
