@@ -50,7 +50,8 @@ def interpolateLinear(t, xvals, yvals):
 
 @jit(nopython=True)
 def interpolateLinearExt(t, xvals, yvals):
-    """Implement a faster method to get linear interprolations of the light functions, exclude non-full days"""
+    """Implement a faster method to get linear interpolations of the 
+    light functions, exclude non-full days"""
     i = np.searchsorted(xvals, t) - 1
     ans = (yvals[i + 1] - yvals[i]) / \
           ((xvals[i + 1] - xvals[i]) * (t - xvals[i])) + yvals[i]
@@ -64,7 +65,8 @@ def parse_dt(date, time):
 
 @jit(nopython=True)
 def LightLog(lightlevel, threshold=1.0):
-    """Take the log10 of the light levels, but map 0 to zero and not negative numbers"""
+    """Take the log10 of the light levels, but map 0 to 
+    zero and not negative numbers"""
     if (lightlevel < threshold):
         return (0.0)
     if (lightlevel >= threshold):
@@ -73,15 +75,16 @@ def LightLog(lightlevel, threshold=1.0):
 
 def RegularLight(t, Intensity, PP, period):
     """Define a basic light schedule"""
-    val = 0.5 * sp.tanh(100 * (fmod(t, period))) - 0.5 * \
-        sp.tanh(100 * (fmod(t, period) - PP))
+    val = 0.5 * np.tanh(100 * (fmod(t, period))) - 0.5 * \
+        np.tanh(100 * (fmod(t, period) - PP))
     return (Intensity * val)
 
 
 def RegularLightSimple(t, Intensity=150.0, wakeUp=8.0, workday=16.0):
-    """Define a basic light schedule with a given intensity of the light, wakeup time and length of the active period
-    (non-sleeping)
-    This schedule will automatically repeat on a daily basis, so each day will be the same.....
+    """Define a basic light schedule with a given intensity of the light, 
+    wakeup time and length of the active period (non-sleeping)
+    This schedule will automatically repeat on a daily basis, 
+    so each day will be the same.....
     """
 
     s = fmod(t, 24.0) - wakeUp
@@ -89,13 +92,14 @@ def RegularLightSimple(t, Intensity=150.0, wakeUp=8.0, workday=16.0):
     if (s < 0):
         s += 24.0
 
-    val = 0.5 * sp.tanh(100 * (s)) - 0.5 * sp.tanh(100 * (s - workday))
+    val = 0.5 * np.tanh(100 * (s)) - 0.5 * np.tanh(100 * (s - workday))
     return (Intensity * val)
 
 
 def ShiftWorkLight(t, dayson=5, daysoff=2):
-    """Simulate a night shift worker. Assume they are working a night shift for dayson number of days followed by
-     daysoff normal days where they revert to a normal schedule
+    """Simulate a night shift worker. Assume they are working a 
+    night shift for dayson number of days followed by
+    daysoff normal days where they revert to a normal schedule
     ShiftWorkLight(t, dayson=5, daysoff=2)
     """
 
@@ -178,12 +182,12 @@ def OneDayShift(t, pulse=23.0, wakeUp=8.0, workday=16.0, shift=8.0):
         # adjustment day get to add one hour of bright light
         pulse += 24 * beforeDays
         Light = RegularLightSimple(t, 150.0, wakeUp=wakeUp, workday=workday)
-        Light += 10000.0 * (0.5 * sp.tanh(100 * (t - pulse + 72.0)) -
-                            0.5 * sp.tanh(100 * (t - 1.0 - pulse + 72.0)))
-        Light += 10000.0 * (0.5 * sp.tanh(100 * (t - pulse + 48.0)) -
-                            0.5 * sp.tanh(100 * (t - 1.0 - pulse + 48.0)))
-        Light += 10000.0 * (0.5 * sp.tanh(100 * (t - pulse + 24.0)) -
-                            0.5 * sp.tanh(100 * (t - 1.0 - pulse + 24.0)))
+        Light += 10000.0 * (0.5 * np.tanh(100 * (t - pulse + 72.0)) -
+                            0.5 * np.tanh(100 * (t - 1.0 - pulse + 72.0)))
+        Light += 10000.0 * (0.5 * np.tanh(100 * (t - pulse + 48.0)) -
+                            0.5 * np.tanh(100 * (t - 1.0 - pulse + 48.0)))
+        Light += 10000.0 * (0.5 * np.tanh(100 * (t - pulse + 24.0)) -
+                            0.5 * np.tanh(100 * (t - 1.0 - pulse + 24.0)))
         return (Light)
 
     if (t > 24 * (beforeDays)):
@@ -263,7 +267,6 @@ class NoisyLightInput(object):
         AP = 16.0  # activity period (this is allowed to vary day to day)
         # photoperiod (hours where you can get outdoor sunlight, this is fixed)
         PP = 12.0
-        IntLast = 0.0
         # This controls when the AP starts (defaults to dawn). Can't do wake up
         # earlier than dawn as of yet
         LightOnset = 0.0
@@ -281,7 +284,7 @@ class NoisyLightInput(object):
 
                 # LightOnset=np.random.uniform(0.0,2.0)
 
-            val = 0.5 * sp.tanh(10 * (fmod(t, period) - LightOnset)) - 0.5 * sp.tanh(
+            val = 0.5 * np.tanh(10 * (fmod(t, period) - LightOnset)) - 0.5 * np.tanh(
                 10 * (fmod(t, period) - (AP + LightOnset)))  # Sleep modulation of light input
             if (fmod(t, period) <= PP):
                 # Random light Intensity, allowing for natural light exposures
@@ -297,8 +300,6 @@ class NoisyLightInput(object):
             if (Int < 0.0):
                 Int = 0.0
             self.lightVals.append(Int * val)
-
-            IntLast = Int
 
         self.lightVals = np.array(self.lightVals)
 
@@ -316,10 +317,8 @@ class NoisyLightInput(object):
         plt.show()
 
     def plotAverageLight(self):
-
-        dt = 1.0 / 60.0  # minute long bins
         avgLightLevels = dict()
-        possibleKeys = Set()
+        possibleKeys = set()
         for tt in self.time:
             possibleKeys.add(np.round(fmod(tt, 24.0), 3))
 
@@ -353,7 +352,6 @@ class hchs_light(object):
         fileData.time = pd.to_datetime(fileData.time, format='%H:%M:%S')
         self.data = fileData
 
-        startingDay = self.data.dayofweek.iloc[0]
         dow = list(self.data.dayofweek)
         count = 0
         day_list = [0]
@@ -422,18 +420,17 @@ class hchs_light(object):
 
         sleepTimes = pd.Series(av_data.loc[av_data['wake'] == 0.0, :].index)
 
-        def toangle(x): return np.exp(complex(0, 1) * (2 * sp.pi * x / 24.0))
+        def toangle(x): return np.exp(complex(0, 1) * (2 * np.pi * x / 24.0))
 
         all_angles = np.angle(list(map(toangle, sleepTimes)))
         Z = np.mean(list(map(toangle, sleepTimes)))
-        angle = np.fmod(np.angle(Z) + 2.0 * sp.pi, 2.0 * sp.pi)
-        amp = abs(Z)
+        angle = np.fmod(np.angle(Z) + 2.0 * np.pi, 2.0 * np.pi)
 
-        timeEquivalent = old_div(angle * 24.0, (2.0 * sp.pi))
+        timeEquivalent = angle * 24.0 / (2.0 * np.pi)
 
         if (show):
-            plt.scatter(sp.cos(all_angles), sp.sin(all_angles))
-            plt.scatter(sp.cos(angle), sp.sin(angle), color='green')
+            plt.scatter(np.cos(all_angles), np.sin(all_angles))
+            plt.scatter(np.cos(angle), np.sin(angle), color='green')
             plt.xlim(-1, 1)
             plt.ylim(-1, 1)
             plt.show()
@@ -451,7 +448,6 @@ class hchs_light(object):
             self.data.TimeTotal.iloc[0], self.data.TimeTotal.iloc[-1], 0.01)
         y = list(map(self.LightFunction, ts))
         plt.plot(ts, list(map(LightLog, y)))
-        # plt.scatter(np.array(self.data.TimeTotal), map(LightLog, self.data.Lux), color='red', s=0.1)
         plt.plot(np.array(self.data.TimeTotal), self.data.wake)
         plt.show()
 
@@ -562,7 +558,7 @@ class JennyDataReader(object):
 
         # Trim off the non-full days within the data set and make a light
         # function using that data
-        spInterp = sp.interpolate.UnivariateSpline(xvals, yvals, ext=3)
+        spInterp = np.interpolate.UnivariateSpline(xvals, yvals, ext=3)
         self.LightFunctionInitial = lambda t: np.absolute(
             spInterp(fmod(t, xvals[-1])))
 
@@ -617,18 +613,18 @@ class JennyDataReader(object):
         sleepTimes = pd.Series(
             av_data.loc[av_data['Sleep_Score'] == 1.0, :].index)
 
-        def toangle(x): return np.exp(complex(0, 1) * (2 * sp.pi * x / 24.0))
+        def toangle(x): return np.exp(complex(0, 1) * (2 * np.pi * x / 24.0))
 
         all_angles = np.angle(list(map(toangle, sleepTimes)))
         Z = np.mean(list(map(toangle, sleepTimes)))
-        angle = np.fmod(np.angle(Z) + 2.0 * sp.pi, 2.0 * sp.pi)
+        angle = np.fmod(np.angle(Z) + 2.0 * np.pi, 2.0 * np.pi)
         amp = abs(Z)
 
-        timeEquivalent = old_div(angle * 24.0, (2.0 * sp.pi))
+        timeEquivalent = old_div(angle * 24.0, (2.0 * np.pi))
 
         if (show):
-            plt.scatter(sp.cos(all_angles), sp.sin(all_angles))
-            plt.scatter(sp.cos(angle), sp.sin(angle), color='green')
+            plt.scatter(np.cos(all_angles), np.sin(all_angles))
+            plt.scatter(np.cos(angle), np.sin(angle), color='green')
             plt.xlim(-1, 1)
             plt.ylim(-1, 1)
             plt.show()
