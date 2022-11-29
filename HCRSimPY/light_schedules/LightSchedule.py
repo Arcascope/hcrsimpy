@@ -21,7 +21,6 @@ import pandas as pd
 import pylab as plt
 import scipy as sp
 from numba import jit
-from past.utils import old_div
 from scipy import interpolate
 
 pd.options.mode.chained_assignment = None  # default='warn'
