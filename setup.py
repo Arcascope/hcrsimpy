@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements=["scipy>=1.3"]
+requirements = ["scipy>=1.3"]
 setup(
     name="HCRSimPY",
-    version="1.0.5",
+    version="1.0.6",
     author="Kevin Hannay",
     author_email="khannay24@gmail.com",
     description="A package to simulate and analyze human circadian rhythms.",
