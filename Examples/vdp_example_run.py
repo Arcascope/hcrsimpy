@@ -1,30 +1,31 @@
-#Example run for forger 99 vdp model
+# Example run for forger 99 vdp model
 
-import pylab as plt
-import sys 
+from HCRSimPY.plots import actogram
+from HCRSimPY.models import *
+from HCRSimPY.light_schedules import *
+import sys
+
 sys.path.append("..")
 
-from HCRSimPY.plots import *
-from HCRSimPY.light_schedules import *
-from HCRSimPY.models import *
-from HCRSimPY.plots import actogram
+
+duration = 16.0  # gets 8 hours of sleep
+intensity = 150.0
+wake = 6.0
 
 
-duration=16.0 #gets 8 hours of sleep
-intensity=150.0
-wake=6.0
-LightFunReg=lambda t: RegularLightSimple(t,intensity,wake,duration)
-
-a=vdp_forger99_model(LightFunReg)
-a.integrateModel(24*40)
-tsdf=a.getTS()
+def LightFunReg(t):
+    return RegularLightSimple(t, intensity, wake, duration)
 
 
+# Problem with vdp_model 
+# maybe HCRSimPY? 
+a = vdp_forger99_model(LightFunReg)
+a.integrateModel(24 * 40)
+tsdf = a.getTS()
 
 plt.figure()
-ax=plt.gca()
-acto=actogram(ax, tsdf) #add an actogram to those axes
-
+ax = plt.gca()
+acto = actogram(ax, tsdf)  # add an actogram to those axes
 
 plt.title('Forger 1999 VDP Entrainment under Regular Light Conditions')
 plt.tight_layout()

@@ -9,7 +9,35 @@ The background for these models can be found in our article published in the Jou
 
 https://journals.sagepub.com/eprint/CZRXAPFRWA94ZMFDZWWW/full
 
+Some things to note are the differential equations since the code relies heavily on them. In particular, equations such as the Kronauer-Jewett Model are important and you will find this particular equation featured within the code of the twopop_model.py file. Frequently applied equations include:
+
+* Kronauer-Jewett Light Process
+
+* VDP Model
+
+* Clock Neuron Model
+
+* Cauchy (Lorentzian) Distribution
+
+* Least-squares cost function
+
+
+
 Enjoy!
+
+Common dependencies/Libraries:
+* numpy
+* math
+* matplotlib
+* scipy
+* pandas
+* statsmodels
+* pylab
+* numba
+
+
+Note: The code here uses the most recent and updated versions of these libraries.
+
 
 ## Installing the Package
 
@@ -127,3 +155,25 @@ Virtual environment for dev
 * pip install -e .
 * pip freeze > requirements.txt
 * deactivate
+
+# Further Documentation
+Dated May/June 2022
+
+* Updated package requirement specifications
+* More comments and documentation of software available for light schedule
+* Added PEP-8 compliance
+* Variable renaming for clarification
+* Less code ambiguity
+* Restructured code in general
+
+* Imported new packages
+* Resolved issues and errors with vdp_hilaire07_model.py
+* Updated vdp_hilaire07_model.py
+* Resolved issues and errors with test_vdp_simple.py
+* Updated test_vdp_simple.py
+* Overall code readability enhanced
+* Minor syntax errors resolved overall
+
+* Various implementations of differential equations/mathematical models inspected and corrected
+* Ex from prev.: Kronauer-Jewett Light Process, Clock Neuron Model, etc... 
+
