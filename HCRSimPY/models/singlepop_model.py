@@ -39,7 +39,7 @@ import scipy as sp
 # Make a class to store methods related to simulating the circadian model
 
 
-class SinglePopModel(object):
+class SinglePopModel:
     """A simple python program to integrate the human circadian rhythms model (Hannay et al 2019) for a given light
     schedule"""
 
