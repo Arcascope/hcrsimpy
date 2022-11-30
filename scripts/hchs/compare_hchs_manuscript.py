@@ -9,7 +9,7 @@ https://sleepdata.org/datasets/hchs
 from __future__ import print_function
 from HCRSimPY.models import *
 from HCRSimPy.plots import *
-from HCRSimPY.light_schedules import *
+from HCRSimPY.light import *
 import matplotlib.gridspec as gridspec
 from scipy.interpolate import InterpolatedUnivariateSpline
 from statsmodels.stats.weightstats import ttest_ind

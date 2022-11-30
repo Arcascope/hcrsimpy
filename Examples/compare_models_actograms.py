@@ -4,7 +4,7 @@ This file allows for the comparision of the predictions for the three models and
 
 from __future__ import print_function
 
-from HCRSimPY.light_schedules import *
+from HCRSimPY.light import *
 from HCRSimPY.models import *
 from HCRSimPY.plots import *
 from scipy import interpolate

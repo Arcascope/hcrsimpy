@@ -1,7 +1,15 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
+    
+fastclock_module = Extension('fastclock',
+                    sources = ['./HCRSimPy/fastclock/rk4.c', 
+                               './HCRSimPy/fastclock/fastclock.c', 
+                               './HCRSimPy/fastclock/spmodel.c', 
+                               './HCRSimPy/fastclock/utils.c'],
+                    extra_compile_args = [''],
+                    language = "c")
 
 requirements = ["scipy>=1.3"]
 setup(
@@ -15,6 +23,10 @@ setup(
     url="https://github.com/khannay/HCRSimPY",
     packages=find_packages(),
     install_requires=requirements,
+    headers=['./HCRSimPy/fastclock/rk4.h', 
+                               './HCRSimPy/fastclock/spmodel.h', 
+                               './HCRSimPy/fastclock/utils.h'],
+    ext_modules= [fastclock_module],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

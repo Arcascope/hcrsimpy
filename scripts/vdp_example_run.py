@@ -2,7 +2,7 @@
 
 from HCRSimPY.plots import actogram
 from HCRSimPY.models import *
-from HCRSimPY.light_schedules import *
+from HCRSimPY.light import *
 import sys
 
 sys.path.append("..")

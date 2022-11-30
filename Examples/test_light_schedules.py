@@ -10,7 +10,7 @@ scenarios.
 
 from __future__ import print_function
 from HCRSimPY.models import *
-from HCRSimPY.light_schedules import *
+from HCRSimPY.light import *
 from HCRSimPY.plots import *
 
 import sys

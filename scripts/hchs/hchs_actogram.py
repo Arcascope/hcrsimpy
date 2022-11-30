@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import pylab as plt
 import scipy as sp
-from HCRSimPY import light_schedules
+from HCRSimPY import light
 from HCRSimPY.utils import circular_stats
 from HCRSimPY.plots import latexify 
 from scipy import interpolate
