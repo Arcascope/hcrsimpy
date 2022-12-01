@@ -17,11 +17,14 @@ static PyObject *method_fputs(PyObject *self, PyObject *args) {
     fclose(fp);
 
     return PyLong_FromLong(bytes_copied);
-}
+};
 
 
 static PyObject *integrate_spmodel_wrapper(PyObject *self, PyObject *args) {
     /* Parse arguments */
+    char *str, *filename = NULL;
+    int bytes_copied = -1;
+    
     if(!PyArg_ParseTuple(args, "ss", &str, &filename)) {
         return NULL;
     }
