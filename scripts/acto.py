@@ -174,6 +174,7 @@ if awObj.wake is not None and args.sleep:
                     color='green')
 
 if args.dlmo:
+    ic = np.array([0.70, phase_ic_guess(ts[0]), 0.0])
     spm2 = SinglePopModel({'tau': args.period})
     dlmo_runs = spm2.integrate_observer(ts, args.multiplier*steps, ic)
     acto.plot_phasemarker(
@@ -183,11 +184,12 @@ if args.dlmo:
     print(np.fmod(dlmo_runs[-14:], 24.0))
 
 if args.cbt:
+    ic = np.array([0.70, phase_ic_guess(ts[0]), 0.0])
     spm2 = SinglePopModel({'tau': args.period})
     cbt_runs = spm2.integrate_observer(
         ts, args.multiplier*steps, ic, observer=SinglePopModel.CBTObs)
     acto.plot_phasemarker(
-        cbt_runs, error=np.ones(len(dlmo_runs)), color='red')
+        cbt_runs, error=np.ones(len(cbt_runs)), color='red')
     print(f"CBT mean: {np.mean(np.fmod(cbt_runs, 24.0))}")
     print("Last 14 days of CBTs")
     print(np.fmod(cbt_runs[-14:], 24.0))
