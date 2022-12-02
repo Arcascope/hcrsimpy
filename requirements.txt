@@ -1,3 +1,4 @@
+autopep8 @ file:///opt/conda/conda-bld/autopep8_1650463822033/work
 certifi @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_4d2o0arbv6/croot/certifi_1665076671099/work/certifi
 charset-normalizer==2.1.1
 colorclass==2.2.2
@@ -7,6 +8,7 @@ docopt==0.6.2
 docutils==0.19
 flake8==6.0.0
 fonttools==4.38.0
+-e git+ssh://git@github.com/Arcascope/HCRSimPY.git@727ff071de004538f9abbc5376276b06df314397#egg=hcrsimpy
 idna==3.4
 kiwisolver==1.4.4
 llvmlite==0.39.1
@@ -19,8 +21,10 @@ pandas==1.5.2
 patsy==0.5.3
 Pillow==9.3.0
 pip-upgrader==1.4.15
+ply==3.11
 pycodestyle==2.10.0
 pyflakes==3.0.1
+Pyomo==6.4.3
 pyparsing==3.0.9
 python-dateutil==2.8.2
 pytz==2022.6
@@ -30,4 +34,7 @@ seaborn==0.12.1
 six==1.16.0
 statsmodels==0.13.5
 terminaltables==3.1.10
+toml @ file:///tmp/build/80754af9/toml_1616166611790/work
+torch==1.13.0
+typing_extensions==4.4.0
 urllib3==1.26.13
