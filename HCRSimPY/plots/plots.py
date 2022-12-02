@@ -107,11 +107,11 @@ class Actogram:
     def getRectangles(self, timeon, timeoff, colorIn='white'):
         bottom_x = np.fmod(timeon, 24.0)
         bottom_y = int(timeon/24.0)  # -1
-        #bottom_y = self.num_days-int(timeon/24.0)-1
+        alpha = self.opacity if colorIn != 'white' else 0.0
         r1 = plt.Rectangle((bottom_x, bottom_y), timeoff -
-                           timeon, 1, fc=colorIn, zorder=-1, alpha=self.opacity)
+                           timeon, 1, fc=colorIn, zorder=-1, alpha=alpha)
         r2 = plt.Rectangle((bottom_x+24.0, bottom_y),
-                           timeoff-timeon, 1, fc=colorIn, zorder=1, alpha=self.opacity)
+                           timeoff-timeon, 1, fc=colorIn, zorder=1, alpha=alpha)
         return((r1, r2))
 
     def addRect(self, timeon, timeoff, colorIn='white', plt_option='both'):

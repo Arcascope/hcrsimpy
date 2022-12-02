@@ -92,12 +92,12 @@ class AppleWatchReader(object):
                            data_id="Exporter"
                            ):
 
-        steps = pd.read_csv(directory_path+"/steps.csv")
-        hr = pd.read_csv(directory_path+"/hr.csv")
+        steps = pd.read_csv(directory_path+"/combined_steps.csv")
+        hr = pd.read_csv(directory_path+"/combined_heartrate.csv")
 
-        steps.rename(columns={'Start': 'Time_Start',
-                     'End': 'Time_End', 'Steps': 'Steps'}, inplace=True)
-        hr.rename(columns={'Timestamp': 'Time', 'HR': 'HR'}, inplace=True)
+        steps.rename(columns={steps.columns[0]: 'Time_Start',
+                     steps.columns[1]: 'Time_End', steps.columns[2]: 'Steps'}, inplace=True)
+        hr.rename(columns={hr.columns[0]: 'Time', hr.columns[1]: 'HR'}, inplace=True)
 
         df = self.process_applewatch_pandas(steps, hr, bin_minutes=bin_minutes)
 
