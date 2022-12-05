@@ -32,4 +32,7 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ],
     python_requires='>=3.8',
+    entry_points = {
+        'console_scripts': ['acto=hcrsimpy.acto:main'],
+    },
 )

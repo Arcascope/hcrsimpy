@@ -1,4 +1,4 @@
-#! python3
+#! python
 
 import torch
 from torch import jit
