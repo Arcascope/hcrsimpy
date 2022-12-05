@@ -120,3 +120,4 @@ build/*
 hcrsim/*
 HCRSimPY.egg-info/*
 .vscode/settings.json
+sleep_updown_v1_traced.pt.textClipping
