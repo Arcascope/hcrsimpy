@@ -76,7 +76,7 @@ def run_compactness_longterm():
     
     reader = AppleWatchReader()
     #awObj = reader.read_arcascope_json("/Users/khannay/Desktop/person.json")
-    awObj = reader.read_arcascope_json("/Users/khannay/data/WearableData/LongTermUnlabeled/exporter/kmhAllData.json")
+    awObj = reader.read_standard_json("/Users/khannay/data/WearableData/LongTermUnlabeled/exporter/kmhAllData.json")
     #awObj = reader.read_json_data("/Users/khannay/Arcascope/Python/TrialDataTools/download/02737ec6ea3d15c132c6d82ccc0fa7c0/combined_data.json")
     ts, compactness=compactness_trajectory(awObj, gamma = 0.0, multiplier = 1.0, num_days=4.5) 
     
@@ -128,8 +128,8 @@ def run_compactness_hchs():
 
 
 if __name__ == "__main__":
-    run_compactness_jenny()
+    #run_compactness_jenny()
     #run_compactness_hchs()
 
     #run_compactness_phil()
-    #run_compactness_longterm()
+    run_compactness_longterm()
