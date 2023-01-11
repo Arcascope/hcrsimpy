@@ -1,7 +1,7 @@
 import unittest
 
 import numpy as np
-from HCRSimPY.models import SinglePopModel
+from hcrsimpy.models import SinglePopModel
 
 
 class SinglePopModelTests(unittest.TestCase):

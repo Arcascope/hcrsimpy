@@ -116,7 +116,8 @@ class AppleWatchReader(object):
                             subject_id="",
                             data_id="Exporter",
                             sleep_trim: bool = False,
-                            gzip_opt: bool = False
+                            gzip_opt: bool = False,
+                            read_sleep: bool = True
                             ):
 
         gzip_opt = gzip_opt if gzip_opt else filepath.endswith(".gz")
@@ -126,19 +127,54 @@ class AppleWatchReader(object):
         if 'wearables' in rawJson.keys():
             rawJson = rawJson['wearables']
 
+        steps = pd.DataFrame(rawJson['steps'])
+        hr = pd.DataFrame(rawJson['heartrate'])
+        if 'sleep' in rawJson.keys():
+            wake = AppleWatchReader.process_sleep(rawJson) 
+        else:
+            wake = None 
+
+
+        # Some older files use stop instead of end
+        endStepPeriodName = 'end'
+        if 'stop' in steps.columns:
+            endStepPeriodName = 'stop'
+
+        steps.rename(columns={'start': 'Time_Start',
+                     endStepPeriodName: 'Time_End', 'steps': 'Steps'},
+                     inplace=True)
+
+        hr.rename(columns={'timestamp': 'Time',
+                           'heartrate': 'HR'}, inplace=True)
+        
+        df = self.process_applewatch_pandas(
+            steps, hr, wake=wake, bin_minutes=bin_minutes, inner_join=True)
+        
+        if sleep_trim:
+            df = df.dropna(subset=['Wake'])
+        aw = AppleWatch(date_time=df.UnixTime.to_numpy(),
+                        time_total=df.TimeTotal.to_numpy(),
+                        heartrate=df.HR.to_numpy(),
+                        steps=df.Steps.to_numpy(),
+                        wake=df.Wake.to_numpy() if wake is not None else None,
+                        subject_id=subject_id,
+                        data_id=data_id
+                        )
+
+        return aw
+
+    @staticmethod
+    def process_sleep(rawJson):
         sleep_wake_upper_cutoff_hrs = 18.0
         wake_period_minimum_cutoff_seconds = 360.0
         sleep_interp_bin_secs = 60.0
-
-        steps = pd.DataFrame(rawJson['steps'])
-        hr = pd.DataFrame(rawJson['heartrate'])
-
+        
         try:
             sleepList = [(s['interval']['start'], s['interval']['duration'], 0.0)
-                         for s in rawJson['sleep'] if 'sleep' in s['value'].keys()]
+                        for s in rawJson['sleep'] if 'sleep' in s['value'].keys()]
         except:
             sleepList = [(s['interval']['start'], s['interval']['duration'], 0.0)
-                         for s in rawJson['sleep'] if s['value'] == 'sleep']
+                        for s in rawJson['sleep'] if s['value'] == 'sleep']
         sleepList.sort(key=lambda x: x[0])
         for idx in range(1, len(sleepList)):
             last_sleep_end = sleepList[idx-1][0] + sleepList[idx-1][1]
@@ -158,34 +194,5 @@ class AppleWatchReader(object):
                     {'timestamp': last_time, 'wake': s[2]})
                 last_time += sleep_interp_bin_secs
 
-        wake = pd.DataFrame(flattenSleepWakeList)
-
-        # Some older files use stop instead of end
-        endStepPeriodName = 'end'
-        if 'stop' in steps.columns:
-            endStepPeriodName = 'stop'
-
-        steps.rename(columns={'start': 'Time_Start',
-                     endStepPeriodName: 'Time_End', 'steps': 'Steps'},
-                     inplace=True)
-
-        hr.rename(columns={'timestamp': 'Time',
-                           'heartrate': 'HR'}, inplace=True)
-
-        df = self.process_applewatch_pandas(
-            steps, hr, wake=wake, bin_minutes=bin_minutes, inner_join=True)
-
-        if sleep_trim:
-            df = df.dropna(subset=['Wake'])
-        aw = AppleWatch(date_time=df.UnixTime.to_numpy(),
-                        time_total=df.TimeTotal.to_numpy(),
-                        heartrate=df.HR.to_numpy(),
-                        steps=df.Steps.to_numpy(),
-                        wake=df.Wake.to_numpy(),
-                        subject_id=subject_id,
-                        data_id=data_id
-                        )
-
-        return aw
-
+        return pd.DataFrame(flattenSleepWakeList)
     

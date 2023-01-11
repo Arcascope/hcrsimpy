@@ -33,6 +33,6 @@ setup(
     ],
     python_requires='>=3.8',
     entry_points = {
-        'console_scripts': ['acto=hcrsimpy.acto:main'],
+        'console_scripts': ['acto=hcrsimpy.acto:main', 'esri=hcrsimpy.esri:main'],
     },
 )
