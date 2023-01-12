@@ -50,7 +50,7 @@ class Light(object):
         return ax
 
 
-def make_pulse(t, tstart, tend, steep : float = 30.0):
+def make_pulse(t, tstart, tend, steep: float = 30.0):
     return 0.5*np.tanh(steep*(t-tstart))-0.5*np.tanh(steep*(t-tend))
 
 
@@ -82,7 +82,8 @@ def RegularLight(t, Intensity=150.0, wakeUp=8.0, workday=16.0, steep: float = 30
     light_val = Intensity * make_pulse(s, wakeUp, workday+wakeUp, steep=steep)
 
     if wakeUp+workday >= 24.0:
-        light_val += Intensity * make_pulse(s, 0.0, workday+wakeUp-24.0, steep=steep)
+        light_val += Intensity * \
+            make_pulse(s, 0.0, workday+wakeUp-24.0, steep=steep)
 
     return light_val
 
@@ -102,7 +103,7 @@ def ShiftWorkLight(t, dayson=5, daysoff=2):
         return(RegularLight(t, Intensity=250.0, wakeUp=9.0, workday=16.0))
 
 
-def ShiftWorkerThreeTwelves(t, Intensity=150.0, pos = False):
+def ShiftWorkerThreeTwelves(t, Intensity=150.0, pos=False):
     """
     Simulate a worker who does three 12 hour night shifts in a row followed 
     by four days off. 
@@ -112,17 +113,20 @@ def ShiftWorkerThreeTwelves(t, Intensity=150.0, pos = False):
     before the next shift
     """
 
-    t = np.fmod(t,7*24)  # make it repeat weekly
+    t = np.fmod(t, 7*24)  # make it repeat weekly
     if (t <= 24*3):
         if not pos:
             return(RegularLight(t, Intensity=Intensity, wakeUp=19.0, workday=16.0))
         else:
-            f=lambda t: RegularLight(t, Intensity=Intensity, wakeUp=19.0, workday=12.0)+RegularLight(t, Intensity=Intensity, wakeUp=7.0, duration=4.0)
+            def f(t): return RegularLight(t, Intensity=Intensity, 
+                                          wakeUp=19.0,
+                                          workday=12.0)+RegularLight(t, 
+                                                                     Intensity=Intensity, 
+                                                                     wakeUp=7.0, 
+                                                                     duration=4.0)
             return f
     else:
         return(RegularLight(t, Intensity=Intensity, wakeUp=7.0, workday=16.0))
-
-
 
 
 def SocialJetLag(t, weekdayWake=7.0, weekdayBed=24.0, weekendWake=11.0, weekendBed=2.0):
@@ -156,7 +160,6 @@ def SlamShift(t, shift=8.0, Intensity=150.0, beforeDays=10):
         return(RegularLight(t, Intensity, wakeUp=newVal, workday=16.0))
 
 
-# %%
 if __name__ == '__main__':
     #LS=Light(lambda t: SlamShift(t, beforeDays=3.0), duration=6*24.0)
     LR = Light(lambda t: RegularLight(t), duration=10*24.0)
@@ -166,5 +169,3 @@ if __name__ == '__main__':
     LS.plot()
 
 
-
-# %%

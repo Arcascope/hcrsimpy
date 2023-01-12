@@ -24,10 +24,10 @@ class TwoPopModelTests(unittest.TestCase):
         u0 = np.array([1.0, 1.0, 0.0,0.0, 0.0])
         
         dlmo = model.integrate_observer(ts, light_est, u0) 
-        self.assertAlmostEqual(np.diff(dlmo)[-1], 24.2, "Darkness period is incorrect")
+        self.assertAlmostEqual(np.diff(dlmo)[-1], 24.2, msg = "Darkness period is incorrect")
         
         cbt = model.integrate_observer(ts, light_est, u0, observer=TwoPopulationModel.CBTObs) 
-        self.assertAlmostEqual(np.diff(cbt)[-1], 24.2, "Darkness period is incorrect")
+        self.assertAlmostEqual(np.diff(cbt)[-1], 24.2, msg = "Darkness period is incorrect")
 
 if __name__ == '__main__':
     unittest.main()

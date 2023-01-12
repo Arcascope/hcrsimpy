@@ -38,7 +38,7 @@ class Actogram:
                  ax=None,
                  threshold=10.0,
                  threshold2=None,
-                 opacity: float = 0.0,
+                 opacity: float = 1.0,
                  color: str = 'black',
                  smooth=True,
                  sigma=[2.0,2.0]

@@ -21,10 +21,9 @@ in this package.
 
 """
 
-#from hcrsimpy.light import *
 from hcrsimpy.models import CircadianModel
 import numpy as np
-import scipy.integrate 
+
 
 class TwoPopulationModel(CircadianModel):
     """ A simple python implementation of the two population human model from Hannay et al 2019"""
@@ -41,25 +40,6 @@ class TwoPopulationModel(CircadianModel):
 
         # Set the parameters to the published values by default
         self._default_params()
-        
-        # self.tauV = 24.25
-        # self.tauD = 24.0
-        # self.Kvv = 0.05
-        # self.Kdd = 0.04
-        # self.Kvd = 0.05
-        # self.Kdv = 0.01
-        # self.gamma = 0.024
-        # self.A1 = 0.440068
-        # self.A2 = 0.159136
-        # self.BetaL = 0.06452
-        # self.BetaL2 = -1.38935
-        # self.sigma = 0.0477375
-        # self.G = 33.75
-        # self.alpha_0 = 0.05
-        # self.delta = 0.0075
-        # self.p = 1.5
-        # self.I0 = 9325.0
-        
         if params:
             self.set_parameters(params)
         
@@ -260,41 +240,12 @@ class TwoPopulationModel(CircadianModel):
     def phase_difference(state):
         return state[2] - state[3]
     
-
     @staticmethod
-    def guessICDataTwoPop(LightFunc, time_zero, length=150):
+    def guessICDataTwoPop(time_zero, length=150):
         """Guess the Initial conditions for the model using the persons light schedule
         Need to add a check to see if the system is entrained at all
         """
 
-        a = TwoPopulationModel()
-        # make a rough guess as to the initial phase
-        init = [0.7, 0.7, np.fmod(time_zero / 24.0 * 2 * np.pi + np.pi, 2 * np.pi),
-                np.fmod(time_zero / 24.0 * 2 * np.pi + np.pi, 2 * np.pi), 0.01]
-
-        a.integrateModel(int(length) * 24.0, initial=init)
-        init = a.results[-1, :]
-        a.integrateModel(48.0, initial=init)
-
-        limit_cycle = a.results
-        def timeDay(x): return fmod(x, 48.0)
-        lc_ts = np.array(list(map(timeDay, a.ts)))
-
-        idx = np.searchsorted(lc_ts, time_zero) - 1
-        initial = limit_cycle[idx, :]
-        initial[2] = fmod(initial[2], 2 * np.pi)
-        initial[3] = fmod(initial[3], 2 * np.pi)
-        # print time_zero, initial
-        return (initial)
+        pass
 
 
-if __name__ == "__main__":
-    model = TwoPopulationModel()
-    ts = np.arange(0,24*30, 0.10)
-    light_est = np.zeros(len(ts))
-    u0 = np.array([1.0, 1.0, 0.0,0.0, 0.0])
-    sol = model.integrate_model(ts, light_est, u0)
-    print(sol[:,-1], 30*2*np.pi)
-    
-    dlmo = model.integrate_observer(ts, light_est, u0) 
-    print(np.diff(dlmo))
