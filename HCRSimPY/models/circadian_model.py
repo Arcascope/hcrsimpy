@@ -24,7 +24,6 @@ class CircadianModel(ABC):
         """
         pass
 
-    @staticmethod
     def step_rk4(self, state: np.ndarray, light_val: float, dt=0.10):
         """
             Return the state of the model assuming a constant light value

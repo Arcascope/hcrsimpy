@@ -1,8 +1,8 @@
 # Example run for forger 99 vdp model
 
-from HCRSimPY.plots import actogram
-from HCRSimPY.models import *
-from HCRSimPY.light import *
+from hcrsimpy.plots import actogram
+from hcrsimpy.models import *
+from hcrsimpy.light import *
 import sys
 
 sys.path.append("..")

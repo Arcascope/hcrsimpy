@@ -54,11 +54,7 @@ class SinglePopModel(CircadianModel):
 
     def _default_params(self):
         """
-            Load the model parameters, if useFile is False this will search the local directory for a optimalParams.dat file.
-
-            setParameters()
-
-            No return value
+            Use the default parameters as defined in Hannay et al 2019
         """
         default_params = {'tau': 23.84, 'K': 0.06358, 'gamma': 0.024,
                           'Beta1': -0.09318, 'A1': 0.3855, 'A2': 0.1977,
@@ -117,9 +113,6 @@ class SinglePopModel(CircadianModel):
         """
         params = self.get_parameters_array()
         n = len(ts)
-
-        sol = None
-        
         sol = np.zeros((n, 3))
         fastclock.integrate_spmodel_save(
             c_void_p(sol.ctypes.data),
@@ -155,8 +148,4 @@ class SinglePopModel(CircadianModel):
 
 
 
-if __name__ == "__main__":
-    model = SinglePopModel()
-    sol = model.integrate_model(np.linspace(0,100.0,1000), np.zeros(1000), np.array([1.0, 0.0,0.0]))
-    print(sol.shape)
-    print(sol[:,-1])
+
