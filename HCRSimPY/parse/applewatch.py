@@ -28,8 +28,8 @@ class WearableObservation:
 class AppleWatch:
     date_time: List[np.ndarray]
     time_total: List[np.ndarray]
-    heartrate: List[np.ndarray]
     steps: List[np.ndarray]
+    heartrate: List[np.ndarray] = None
     wake: List[np.ndarray] = None
     phase_measure: np.ndarray = None
     phase_measure_times: np.ndarray = None
@@ -126,7 +126,8 @@ class AppleWatch:
             idx1 = 0
         self.time_total = np.hstack(self.time_total)[idx1:idx2]
         self.steps = np.hstack(self.steps)[idx1:idx2]
-        self.heartrate = np.hstack(self.heartrate)[idx1:idx2]
+        if self.heartrate is not None:
+            self.heartrate = np.hstack(self.heartrate)[idx1:idx2]
         self.date_time = np.hstack(self.date_time)[idx1:idx2]
         self.time_total, self.steps, self.heartrate = split_missing_data(
             self.time_total, self.steps, self.heartrate, break_threshold=96.0)
@@ -137,9 +138,10 @@ class AppleWatch:
         idx_select = (self.time_total[0] >= t1) & (self.time_total[0] <= t2)
         self.time_total[0] = self.time_total[0][idx_select]
         self.steps[0] = self.steps[0][idx_select]
-        self.heartrate[0] = self.heartrate[0][idx_select]
         self.date_time[0] = self.date_time[0][idx_select]
 
+        if self.heartrate is not None:
+            self.heartrate[0] = self.heartrate[0][idx_select]
         if self.wake is not None:
             self.wake[0] = self.wake[0][idx_select]
 
@@ -161,8 +163,9 @@ class AppleWatch:
         steps = np.hstack(self.steps)
         heartrate = np.hstack(self.heartrate)
 
-        hr = deepcopy(heartrate)
-        hr[hr == 0] = np.nan
+        if self.heartrate is not None:
+            hr = deepcopy(heartrate)
+            hr[hr == 0] = np.nan
 
         time_start = t1 if t1 is not None else time_total[0]/24.0
         time_end = t2 if t2 is not None else time_total[-1]/24.0
@@ -172,7 +175,10 @@ class AppleWatch:
         ax = gs.subplots(sharex=True)
         fig.suptitle(
             f"{self.data_id} Applewatch Data: Subject {self.subject_id}")
-        ax[0].plot(time_total / 24.0, hr, color='red', *args, **kwargs)
+        
+        if self.heartrate is not None:
+            ax[0].plot(time_total / 24.0, hr, color='red', *args, **kwargs)
+            
         ax[1].plot(time_total / 24.0, steps,
                    color='darkgreen', *args, **kwargs)
 
@@ -197,6 +203,9 @@ class AppleWatch:
         plt.show()
 
     def scatter_hr_steps(self, take_log: bool = True, *args, **kwargs):
+        
+        if self.heartrate is None:
+            print("No heartrate data")
         fig = plt.figure()
         ax = plt.gca()
 

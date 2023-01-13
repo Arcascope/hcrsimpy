@@ -20,7 +20,7 @@ class AppleWatchReader(object):
 
     def process_applewatch_pandas(self,
                                   steps: pd.DataFrame,
-                                  heartrate: pd.DataFrame,
+                                  heartrate: pd.DataFrame = None,
                                   wake: pd.DataFrame = None,
                                   bin_minutes: int = 6,
                                   debug=False,
@@ -45,18 +45,21 @@ class AppleWatchReader(object):
                                'Min').agg({'Steps': 'sum'})
         steps.reset_index(inplace=True)
 
-        if 'Time' not in heartrate:
-            heartrate['Time'] = steps['Time']
-            heartrate['HR'] = np.zeros(len(steps['Time']))
-        heartrate['Time'] = pd.to_datetime(heartrate.Time, unit='s')
-        heartrate.set_index('Time', inplace=True)
-        heartrate = heartrate.resample(
-            str(int(bin_minutes))+'Min').agg({'HR': 'max'})
-        heartrate.reset_index(inplace=True)
+        if heartrate is not None:
+            if 'Time' not in heartrate:
+                heartrate['Time'] = steps['Time']
+                heartrate['HR'] = np.zeros(len(steps['Time']))
+            heartrate['Time'] = pd.to_datetime(heartrate.Time, unit='s')
+            heartrate.set_index('Time', inplace=True)
+            heartrate = heartrate.resample(
+                str(int(bin_minutes))+'Min').agg({'HR': 'max'})
+            heartrate.reset_index(inplace=True)
 
-        merge_method = 'inner' if inner_join else 'left'
-        df = pd.merge(steps, heartrate, on='Time', how=merge_method)
-        df = df.fillna(0)
+            merge_method = 'inner' if inner_join else 'left'
+            df = pd.merge(steps, heartrate, on='Time', how=merge_method)
+            df = df.fillna(0)
+        else:
+            print("Skipping heartrate")
 
         if wake is not None:
             wake['Time'] = pd.to_datetime(wake.timestamp, unit='s')
@@ -128,7 +131,7 @@ class AppleWatchReader(object):
             rawJson = rawJson['wearables']
 
         steps = pd.DataFrame(rawJson['steps'])
-        hr = pd.DataFrame(rawJson['heartrate'])
+        
         if 'sleep' in rawJson.keys():
             wake = AppleWatchReader.process_sleep(rawJson) 
         else:
@@ -144,9 +147,12 @@ class AppleWatchReader(object):
                      endStepPeriodName: 'Time_End', 'steps': 'Steps'},
                      inplace=True)
 
-        hr.rename(columns={'timestamp': 'Time',
-                           'heartrate': 'HR'}, inplace=True)
-        
+        if 'heartrate' in rawJson.keys():
+            hr = pd.DataFrame(rawJson['heartrate'])
+            hr.rename(columns={'timestamp': 'Time',
+                            'heartrate': 'HR'}, inplace=True)
+        else:
+            hr = None 
         df = self.process_applewatch_pandas(
             steps, hr, wake=wake, bin_minutes=bin_minutes, inner_join=True)
         

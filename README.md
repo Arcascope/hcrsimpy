@@ -38,7 +38,6 @@ Okay great we can import some models, but the idea is to have a uniform input an
 
 All of the these models are implemented as a python class, with their parameters stored as members of that class. 
 
-
 The idea to to be able to quickly change between and compare the outputs for different models. 
 
 Here is an example run for the the single population variant of my model:
