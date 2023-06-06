@@ -1,4 +1,4 @@
-# :no_entry: [DEPRECATED] Active at https://github.com/Arcascope/circadian
+# :no_entry: [DEPRECATED] Active at [circadian](https://github.com/Arcascope/circadian)
 
 ## Human Circadian Rhythms Simulation Package in Python
 
