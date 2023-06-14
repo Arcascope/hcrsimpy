@@ -1,4 +1,6 @@
-# Human Circadian Rhythms Simulation Package in Python
+# :no_entry: [DEPRECATED] Active at [circadian](https://github.com/Arcascope/circadian)
+
+## Human Circadian Rhythms Simulation Package in Python
 
 Tools for simulating human circadian rhythms for a given light schedule. This package implements models for human circadian rhythms and some tools for visualizing the rhythms in python.
 
